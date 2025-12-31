@@ -2,6 +2,14 @@
     $user = auth()->user();
     $role = $user?->role;
 
+    /**
+     * Pilih route admin ramah anak yang benar.
+     * Kamu sebelumnya pakai:
+     * Route::get('/ramah-anak', ...)->name('kids.index');
+     * jadi route name = admin.kids.index
+     */
+    $kidsRouteName = 'admin.kids.index';
+
     $baseMenus = [
         'admin' => [
             ['label' => 'Dashboard', 'route' => 'admin.dashboard'],
@@ -10,7 +18,6 @@
             ['label' => 'Edit Profil Masjid', 'route' => 'admin.mosque_profile.edit'],
             ['label' => 'Struktur Masjid', 'route' => 'admin.mosque_structure.index'],
 
-            // ✅ TAMBAH INI
             ['label' => 'Kelola Proker', 'route' => 'admin.work_program.all'],
 
             ['label' => 'Artikel', 'route' => 'admin.artikels.index'],
@@ -20,6 +27,10 @@
             ['label' => 'Transaksi Donasi', 'route' => 'admin.transaksi-donasis.index'],
             ['label' => 'Galeri', 'route' => 'admin.galeris.index'],
             ['label' => 'Perpustakaan', 'route' => 'admin.perpustakaans.index'],
+
+            // ✅ MENU BARU: RAMAH ANAK
+            ['label' => 'Ramah Anak', 'route' => $kidsRouteName],
+
             ['label' => 'Moderasi Tanya Ustadz', 'route' => 'admin.moderasi.index'],
         ],
 
@@ -28,6 +39,9 @@
             ['label' => 'Artikel', 'route' => 'admin.pengurus.artikel'],
             ['label' => 'Kegiatan', 'route' => 'admin.pengurus.kegiatan'],
             ['label' => 'Perpustakaan', 'route' => 'admin.pengurus.perpustakaan'],
+
+            // ✅ MENU BARU: RAMAH ANAK (kalau pengurus boleh kelola)
+            ['label' => 'Ramah Anak', 'route' => $kidsRouteName],
         ],
 
         'ustadz' => [
@@ -63,15 +77,28 @@
         <nav class="mt-8 space-y-2">
             @foreach ($menus as $menu)
                 @php
+                    // active state
                     $isActive =
                         request()->routeIs($menu['route']) ||
                         request()->routeIs($menu['route'].'.*');
+
+                    // aman kalau route belum ada
+                    $href = '#';
+                    if (is_string($menu['route']) && \Illuminate\Support\Facades\Route::has($menu['route'])) {
+                        $href = route($menu['route']);
+                    }
                 @endphp
 
-                <a href="{{ route($menu['route']) }}"
-                   class="block rounded px-3 py-2 text-sm font-medium
+                <a href="{{ $href }}"
+                   class="flex items-center justify-between rounded px-3 py-2 text-sm font-medium
                           {{ $isActive ? 'bg-emerald-100 text-emerald-800' : 'text-gray-600 hover:bg-gray-100' }}">
-                    {{ $menu['label'] }}
+                    <span>{{ $menu['label'] }}</span>
+
+                    @if($menu['label'] === 'Ramah Anak')
+                        <span class="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-emerald-900">
+                            ANAK
+                        </span>
+                    @endif
                 </a>
             @endforeach
         </nav>

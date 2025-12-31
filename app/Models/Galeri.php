@@ -14,5 +14,7 @@ class Galeri extends Model
         'deskripsi',
         'url_file',
         'tipe',
+        'kategori',
+        'seksi',
     ];
 }

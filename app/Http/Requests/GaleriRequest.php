@@ -3,31 +3,31 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class GaleriRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
             'judul' => ['required', 'string', 'max:255'],
             'deskripsi' => ['nullable', 'string'],
-            'attachment' => ['nullable', 'file', 'max:8192'],
+
+            // file upload opsional, tapi wajib salah satu: attachment atau url_file
+            'attachment' => ['nullable', 'file', 'max:8192', 'mimetypes:image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime'],
             'url_file' => ['nullable', 'string', 'max:255'],
-            'tipe' => ['required', 'in:image,video'],
+
+            'tipe' => ['required', Rule::in(['image', 'video'])],
+
+            // dropdown baru
+            'kategori' => ['required', Rule::in(['idarah', 'imarah', 'riayah'])],
+            'seksi' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -37,7 +37,9 @@ class GaleriRequest extends FormRequest
             if (! $this->hasFile('attachment') && ! $this->filled('url_file')) {
                 $validator->errors()->add('url_file', 'Unggah file atau isi URL galeri.');
             }
+
+            // Kalau tipe video tapi upload image (atau sebaliknya) bisa kamu ketatkan di sini.
+            // Untuk sekarang cukup mimetype list di atas + pilihan tipe.
         });
     }
-}
 }

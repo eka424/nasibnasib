@@ -39,18 +39,29 @@ class KegiatanFrontController extends Controller
         return view('front.kegiatans.show', compact('kegiatan'));
     }
 
-    public function daftar(KegiatanDaftarRequest $request, Kegiatan $kegiatan): RedirectResponse
-    {
-        $user = $request->user();
-        $this->authorize('create', PendaftaranKegiatan::class);
+   public function daftar(KegiatanDaftarRequest $request, Kegiatan $kegiatan): RedirectResponse
+{
+    $user = $request->user();
+    $this->authorize('create', PendaftaranKegiatan::class);
 
-        PendaftaranKegiatan::firstOrCreate([
-            'user_id' => $user->id,
-            'kegiatan_id' => $kegiatan->id,
-        ]);
+    $pendaftaran = PendaftaranKegiatan::firstOrCreate([
+        'user_id' => $user->id,
+        'kegiatan_id' => $kegiatan->id,
+    ]);
 
-        return back()->with('success', 'Pendaftaran kegiatan berhasil, silakan menunggu konfirmasi.');
-    }
+    // pesan dinamis
+    $isNew = $pendaftaran->wasRecentlyCreated;
+
+    $message = $isNew
+        ? "Pendaftaran berhasil. Anda sudah terdaftar, jangan lupa datang pada tanggal {$kegiatan->tanggal_mulai_label}."
+        : "Anda sudah terdaftar. Jangan lupa datang pada tanggal {$kegiatan->tanggal_mulai_label}.";
+
+    return back()->with('kegiatan_flash', [
+        'type' => 'success',
+        'message' => $message,
+        'gcal' => $kegiatan->google_calendar_url, // dari accessor model
+    ]);
+}
 
     public function riwayat(Request $request): View
     {

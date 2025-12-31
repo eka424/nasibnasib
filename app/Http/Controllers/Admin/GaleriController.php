@@ -12,6 +12,28 @@ use Illuminate\View\View;
 
 class GaleriController extends Controller
 {
+    // Peta seksi (samakan dengan frontend)
+    private array $sectionsMap = [
+        'idarah' => [
+            'SEKSI DOKUMENTASI, PERPUSTAKAAN DAN PENERBITAN',
+            'SEKSI HUMAS, INFORMASI DAN KOMUNIKASI',
+            'SEKSI PERIBADATAN',
+            'Lainnya',
+        ],
+        'imarah' => [
+            'SEKSI PENDIDIKAN, PELATIHAN DAN KADERISASI',
+            'SEKSI PEMBERDAYAAN PEREMPUAN DAN SOSIAL',
+            'SEKSI KESEHATAN',
+            'SEKSI PEREKONOMIAN',
+            'Lainnya',
+        ],
+        'riayah' => [
+            'SEKSI PEMBANGUNAN, PEMELIHARAAN DAN PERAWATAN',
+            'SEKSI KEAMANAN, KETERTIBAN DAN KEBERSIHAN',
+            'Lainnya',
+        ],
+    ];
+
     public function __construct()
     {
         $this->middleware(['role:admin|pengurus']);
@@ -20,7 +42,7 @@ class GaleriController extends Controller
 
     public function index(Request $request): View
     {
-        $filters = $request->only(['q', 'tipe', 'sort']);
+        $filters = $request->only(['q', 'tipe', 'sort', 'kategori', 'seksi']);
 
         $galeriQuery = Galeri::query();
 
@@ -33,6 +55,14 @@ class GaleriController extends Controller
 
         if ($type = $filters['tipe'] ?? null) {
             $galeriQuery->where('tipe', $type);
+        }
+
+        // filter baru (optional)
+        if ($kategori = $filters['kategori'] ?? null) {
+            $galeriQuery->where('kategori', $kategori);
+        }
+        if ($seksi = $filters['seksi'] ?? null) {
+            $galeriQuery->where('seksi', $seksi);
         }
 
         $sort = $filters['sort'] ?? 'newest';
@@ -86,18 +116,42 @@ class GaleriController extends Controller
             'title' => 'Judul A-Z',
         ];
 
-        return view('admin.galeris.index', compact('galeris', 'filters', 'stats', 'typeOptions', 'sortOptions'));
+        $deptOptions = [
+            '' => 'Semua Kategori',
+            'idarah' => 'Idarah',
+            'imarah' => 'Imarah',
+            'riayah' => 'Riayah',
+        ];
+
+        // untuk filter seksi di index (optional)
+        $sectionsMap = $this->sectionsMap;
+
+        return view('admin.galeris.index', compact(
+            'galeris',
+            'filters',
+            'stats',
+            'typeOptions',
+            'sortOptions',
+            'deptOptions',
+            'sectionsMap'
+        ));
     }
 
     public function create(): View
     {
-        return view('admin.galeris.create');
+        $sectionsMap = $this->sectionsMap;
+        $deptOptions = [
+            'idarah' => 'Idarah',
+            'imarah' => 'Imarah',
+            'riayah' => 'Riayah',
+        ];
+
+        return view('admin.galeris.create', compact('sectionsMap', 'deptOptions'));
     }
 
     public function store(GaleriRequest $request): RedirectResponse
     {
         Galeri::create($this->prepareData($request));
-
         return redirect()->route('admin.galeris.index')->with('success', 'Galeri ditambahkan.');
     }
 
@@ -108,7 +162,14 @@ class GaleriController extends Controller
 
     public function edit(Galeri $galeri): View
     {
-        return view('admin.galeris.edit', compact('galeri'));
+        $sectionsMap = $this->sectionsMap;
+        $deptOptions = [
+            'idarah' => 'Idarah',
+            'imarah' => 'Imarah',
+            'riayah' => 'Riayah',
+        ];
+
+        return view('admin.galeris.edit', compact('galeri', 'sectionsMap', 'deptOptions'));
     }
 
     public function update(GaleriRequest $request, Galeri $galeri): RedirectResponse
@@ -133,6 +194,9 @@ class GaleriController extends Controller
     protected function prepareData(GaleriRequest $request, ?Galeri $galeri = null): array
     {
         $data = $request->safe()->except('attachment');
+
+        // Normalisasi seksi: kalau kosong, set null (atau bisa default "Lainnya")
+        $data['seksi'] = $request->filled('seksi') ? $request->input('seksi') : null;
 
         if ($request->hasFile('attachment')) {
             $data['url_file'] = $request->file('attachment')->store('galeri', 'public');

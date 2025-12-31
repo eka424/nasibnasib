@@ -1,715 +1,637 @@
 <x-front-layout>
-    @php
-        // ====== Data utama dari controller ======
-        // $donasis: collection campaign (judul, deskripsi, target_dana, dana_terkumpul, transaksi_donasis_count, tanggal_selesai)
-        // $recentDonations: collection transaksi terbaru (user->name, jumlah, created_at, anonymous)
-        $bgImage = 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=2200&q=80';
-        $posterFallback = 'https://images.unsplash.com/photo-1541417904950-b855846fe074?auto=format&fit=crop&w=1800&q=80';
+  @php
+    // ====== Data utama dari controller ======
+    $bg = '#13392f';         // theme utama front
+    $accent = '#E7B14B';     // gold accent
+    $primary = '#0F4A3A';
 
-        $totalRaised = $donasis->sum('dana_terkumpul');
-        $totalTarget = $donasis->sum('target_dana');
-        $activeCampaigns = $donasis->count();
-        $totalDonors = $donasis->sum(fn ($d) => (int) ($d->transaksi_donasis_count ?? 0));
+    $bgImage = 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=2200&q=80';
+    $posterFallback = 'https://images.unsplash.com/photo-1541417904950-b855846fe074?auto=format&fit=crop&w=1800&q=80';
 
-        $overallProgress = $totalTarget > 0 ? min(100, max(0, ($totalRaised / $totalTarget) * 100)) : 0;
+    $totalRaised = $donasis->sum('dana_terkumpul');
+    $totalTarget = $donasis->sum('target_dana');
+    $activeCampaigns = $donasis->count();
+    $totalDonors = $donasis->sum(fn ($d) => (int) ($d->transaksi_donasis_count ?? 0));
 
-        $recentList = collect($recentDonations ?? [])->map(function ($item) {
-            return [
-                'name' => $item->anonymous ? 'Anonymous' : ($item->user->name ?? 'Anonim'),
-                'amount' => (int) ($item->jumlah ?? 0),
-                'time' => optional($item->created_at)->diffForHumans() ?? 'Baru saja',
-                'anonymous' => (bool) ($item->anonymous ?? false),
-            ];
-        });
+    $overallProgress = $totalTarget > 0 ? min(100, max(0, ($totalRaised / $totalTarget) * 100)) : 0;
 
-        if ($recentList->isEmpty()) {
-            $recentList = collect([
-                ['name' => 'Ahmad Rizki', 'amount' => 500000, 'time' => '2 jam lalu', 'anonymous' => false],
-                ['name' => 'Anonymous', 'amount' => 750000, 'time' => '4 jam lalu', 'anonymous' => true],
-                ['name' => 'Siti Nurhaliza', 'amount' => 250000, 'time' => '6 jam lalu', 'anonymous' => false],
-                ['name' => 'Anonymous', 'amount' => 1000000, 'time' => '1 hari lalu', 'anonymous' => true],
-            ]);
-        }
+    $recentList = collect($recentDonations ?? [])->map(function ($item) {
+      return [
+        'name' => $item->anonymous ? 'Anonymous' : ($item->user->name ?? 'Anonim'),
+        'amount' => (int) ($item->jumlah ?? 0),
+        'time' => optional($item->created_at)->diffForHumans() ?? 'Baru saja',
+        'anonymous' => (bool) ($item->anonymous ?? false),
+      ];
+    });
 
-        $presetAmounts = [100000, 250000, 500000, 1000000, 2500000, 5000000];
-        $selectedAmount = max(0, (int) old('jumlah', $presetAmounts[1] ?? 250000));
-        $formattedSelectedAmount = number_format($selectedAmount, 0, ',', '.');
+    if ($recentList->isEmpty()) {
+      $recentList = collect([
+        ['name' => 'Ahmad Rizki', 'amount' => 500000, 'time' => '2 jam lalu', 'anonymous' => false],
+        ['name' => 'Anonymous', 'amount' => 750000, 'time' => '4 jam lalu', 'anonymous' => true],
+        ['name' => 'Siti Nurhaliza', 'amount' => 250000, 'time' => '6 jam lalu', 'anonymous' => false],
+        ['name' => 'Anonymous', 'amount' => 1000000, 'time' => '1 hari lalu', 'anonymous' => true],
+      ]);
+    }
 
-        $hasTransaksiRoute = \Illuminate\Support\Facades\Route::has('donasi.transaksi');
-        $donasiActionTemplate = $hasTransaksiRoute
-            ? route('donasi.transaksi', ['donasi' => '__ID__'])
-            : url()->current();
-        $defaultDonasiId = optional($donasis->first())->id;
+    $presetAmounts = [100000, 250000, 500000, 1000000, 2500000, 5000000];
+    $selectedAmount = max(0, (int) old('jumlah', $presetAmounts[1] ?? 250000));
+    $formattedSelectedAmount = number_format($selectedAmount, 0, ',', '.');
 
-        $newsletterHasRoute = \Illuminate\Support\Facades\Route::has('newsletter.store');
-        $newsletterAction = $newsletterHasRoute ? route('newsletter.store') : url()->current();
-        $newsletterMethod = $newsletterHasRoute ? 'POST' : 'GET';
+    $hasTransaksiRoute = \Illuminate\Support\Facades\Route::has('donasi.transaksi');
+    $donasiActionTemplate = $hasTransaksiRoute
+      ? route('donasi.transaksi', ['donasi' => '__ID__'])
+      : url()->current();
+    $defaultDonasiId = optional($donasis->first())->id;
 
-        // helper hari tersisa
-        $daysLeft = function ($endDate) {
-            if (! $endDate) {
-                return null;
-            }
-            $diff = now()->diffInDays(\Carbon\Carbon::parse($endDate)->endOfDay(), false);
-            return max(0, $diff);
-        };
-    @endphp
+    $newsletterHasRoute = \Illuminate\Support\Facades\Route::has('newsletter.store');
+    $newsletterAction = $newsletterHasRoute ? route('newsletter.store') : url()->current();
+    $newsletterMethod = $newsletterHasRoute ? 'POST' : 'GET';
 
-    <style>
-        :root{
-          --bg0:#050914;
-          --bg1:#070f1f;
-          --glass: rgba(255,255,255,.06);
-          --glass2: rgba(255,255,255,.05);
-          --border: rgba(255,255,255,.12);
-          --text: rgba(255,255,255,.92);
-          --muted: rgba(255,255,255,.70);
-          --muted2: rgba(255,255,255,.56);
-          --primary:#10b981;
-          --gold:#d4af37;
-          --shadow: rgba(16,185,129,.18);
-          --shadow2: rgba(0,0,0,.45);
-        }
-        .page{min-height:100vh;padding-bottom:84px;}
-        .container{width:100%;max-width:1100px;margin:0 auto;padding:0 16px;}
-        .glass{
-          background: var(--glass);
-          border: 1px solid var(--border);
-          backdrop-filter: blur(18px);
-          -webkit-backdrop-filter: blur(18px);
-          box-shadow: 0 18px 60px var(--shadow2), 0 10px 30px var(--shadow);
-        }
-        body{
-          background: radial-gradient(1200px 600px at 20% 0%, rgba(16,185,129,.18), transparent 55%),
-                      radial-gradient(900px 500px at 85% 15%, rgba(212,175,55,.16), transparent 55%),
-                      linear-gradient(135deg, var(--bg0), var(--bg1));
-          color: var(--text);
-        }
+    $daysLeft = function ($endDate) {
+      if (! $endDate) return null;
+      $diff = now()->diffInDays(\Carbon\Carbon::parse($endDate)->endOfDay(), false);
+      return max(0, $diff);
+    };
 
-        /* HERO */
-        .hero{position:relative;overflow:hidden;padding:46px 0 26px;}
-        .heroBg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.34;transform:scale(1.03);}
-        .heroOverlay{
-          position:absolute;inset:0;
-          background:
-            radial-gradient(900px 500px at 30% 10%, rgba(16,185,129,.22), transparent 60%),
-            radial-gradient(700px 420px at 80% 30%, rgba(212,175,55,.18), transparent 55%),
-            linear-gradient(to bottom, rgba(5,9,20,.82), rgba(5,9,20,.72), rgba(5,9,20,.90));
-        }
-        .heroInner{position:relative;text-align:center;}
-        .heroBadge{
-          width:68px;height:68px;border-radius:20px;margin:0 auto;display:flex;align-items:center;justify-content:center;
-          font-size:28px;background: linear-gradient(135deg, rgba(16,185,129,.85), rgba(16,185,129,.45));
-          border:1px solid rgba(255,255,255,.16);box-shadow:0 18px 40px rgba(16,185,129,.20);
-        }
-        .heroKicker{margin:16px 0 8px;font-size:12px;letter-spacing:.34em;color:rgba(197,255,232,.78);text-transform:uppercase;}
-        .heroTitle{margin:0;font-size:clamp(28px,4vw,48px);letter-spacing:-.02em;line-height:1.12;}
-        .heroSubtitle{margin:10px auto 0;max-width:720px;color:rgba(220,255,245,.82);font-size:16px;line-height:1.6;}
+    // ====== Icons (flaticon-like outline) ======
+    $ico = [
+      'heart' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>',
+      'gift' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>',
+      'chart' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 2 5-6"/></svg>',
+      'users' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a3 3 0 0 1 0 5.74"/></svg>',
+      'card' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
+      'target' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>',
+      'mail' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/></svg>',
+      'arrowDown' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>',
+      'spark' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.2 6.2L20 10l-5.8 1.8L12 18l-2.2-6.2L4 10l5.8-1.8L12 2z"/></svg>',
+    ];
+  @endphp
 
-        /* Stats */
-        .heroStats{margin:18px auto 0;padding:14px;max-width:980px;border-radius:24px;}
-        .statRow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
-        .stat{padding:10px 12px;border-radius:18px;background:var(--glass2);border:1px solid rgba(255,255,255,.10);text-align:left;}
-        .statLabel{margin:0;font-size:12px;color:rgba(255,255,255,.62);}
-        .statValue{margin:6px 0 0;font-size:15px;font-weight:800;}
+  <style>
+    :root{ --bg: {{ $bg }}; --accent: {{ $accent }}; --primary: {{ $primary }}; }
+    svg{ stroke: currentColor; }
+    svg *{ vector-effect: non-scaling-stroke; }
 
-        .progressWrap{margin-top:12px;padding:10px 12px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);}
-        .progressTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-        .progressText{font-size:12px;color:rgba(255,255,255,.65);}
-        .progressTrack{height:10px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;}
-        .progressBar{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold),var(--primary));}
+    .glass{
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 18px 60px -45px rgba(0,0,0,.55);
+    }
 
-        .heroActions{margin:14px auto 0;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-        .btnPrimary{
-          border:0;cursor:pointer;padding:12px 16px;border-radius:14px;font-weight:800;color:#04110c;
-          background:linear-gradient(135deg,var(--gold),var(--primary));box-shadow:0 14px 34px rgba(16,185,129,.18);
-        }
-        .btnGhost{
-          cursor:pointer;padding:12px 16px;border-radius:14px;font-weight:800;color:rgba(255,255,255,.88);
-          background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
-        }
+    /* ====== FIX: field putih + teks hitam (biar jelas pas ngetik/pilih) ====== */
+    .field-light{
+      color: #0f172a !important;           /* slate-900 */
+      background: rgba(255,255,255,.95) !important;
+      border-color: rgba(255,255,255,.18) !important;
+    }
+    .field-light::placeholder{
+      color: rgba(15,23,42,.55) !important;
+    }
+    .field-light:focus{
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(231,177,75,.55);
+      border-color: rgba(231,177,75,.45) !important;
+    }
+    select.field-light option{ color:#0f172a; }
+  </style>
 
-        /* Main grid */
-        .mainGrid{display:grid;grid-template-columns:1fr;gap:14px;padding-top:14px;}
-        .card{overflow:hidden;border-radius:24px;}
-        .cardHead{padding:18px 18px 0;}
-        .cardBody{padding:18px;display:flex;flex-direction:column;gap:14px;}
-        .cardTitleRow{display:flex;gap:12px;align-items:flex-start;}
-        .iconCircle{
-          width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;
-          background:linear-gradient(135deg, rgba(16,185,129,.22), rgba(212,175,55,.14));
-          border:1px solid rgba(255,255,255,.14);
-        }
-        .cardTitle{margin:0;font-size:18px;letter-spacing:.2px;}
-        .cardDesc{margin:6px 0 0;color:var(--muted2);font-size:13px;}
+  <div class="min-h-screen text-white" style="background: var(--bg);">
 
-        .field{display:flex;flex-direction:column;gap:8px;}
-        .label{font-size:13px;color:rgba(255,255,255,.78);font-weight:700;}
-        .input,.select,.textarea{
-          width:100%;border-radius:16px;border:1px solid rgba(255,255,255,.12);
-          background:rgba(3,8,16,.42);color:rgba(255,255,255,.92);
-          padding:12px 14px;outline:none;
-        }
-        .input::placeholder,.textarea::placeholder{color:rgba(255,255,255,.50);}
-        .input:focus,.select:focus,.textarea:focus{border-color:rgba(16,185,129,.55);box-shadow:0 0 0 4px rgba(16,185,129,.18);}
-        .textarea{resize:vertical;min-height:90px;}
+    {{-- HERO --}}
+    <header class="relative overflow-hidden border-b border-white/10">
+      <div class="absolute inset-0 -z-10">
+        <img src="{{ $bgImage }}" alt="Donasi Masjid"
+             class="h-full w-full object-cover opacity-35" referrerpolicy="no-referrer">
+        <div class="absolute inset-0 bg-gradient-to-b from-black/65 via-black/35 to-black/75"></div>
+        <div class="absolute -left-24 -top-20 h-72 w-72 rounded-full blur-3xl"
+             style="background: rgba(231,177,75,0.14);"></div>
+        <div class="absolute -right-24 top-8 h-80 w-80 rounded-full bg-white/10 blur-3xl"></div>
+      </div>
 
-        .amountGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
-        .amountPill{
-          cursor:pointer;padding:12px 12px;border-radius:16px;border:1px solid rgba(255,255,255,.12);
-          background:rgba(255,255,255,.06);color:rgba(255,255,255,.88);font-weight:800;
-        }
-        .amountPill:hover{border-color:rgba(16,185,129,.38);}
-        .amountPill.active{border-color:rgba(16,185,129,.60);background:rgba(16,185,129,.14);}
+      <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
+        <div class="mx-auto max-w-3xl text-center">
+          <span class="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-4 py-2 text-xs font-semibold text-white/90 backdrop-blur">
+            {!! $ico['spark'] !!} DONASI MASJID
+          </span>
 
-        .hintRow{display:flex;justify-content:space-between;align-items:center;}
-        .hint{font-size:12px;color:rgba(255,255,255,.55);}
-        .hintStrong{font-size:12px;font-weight:800;color:rgba(255,255,255,.86);}
+          <h1 class="mt-4 text-3xl font-extrabold leading-tight text-white sm:text-4xl">
+            Donasi Masjid Agung Al-A’la
+          </h1>
+          <p class="mt-2 text-sm text-white/80 sm:text-base">
+            Dukung program masjid secara transparan dan berdampak. Pilih campaign, tentukan nominal, lalu lanjut pembayaran.
+          </p>
 
-        .segmented{display:grid;grid-template-columns:1fr;gap:10px;}
-        .segBtn{
-          cursor:pointer;text-align:left;padding:12px 14px;border-radius:18px;border:1px solid rgba(255,255,255,.12);
-          background:rgba(255,255,255,.05);color:rgba(255,255,255,.88);
-        }
-        .segBtn.active{border-color:rgba(16,185,129,.60);background:rgba(16,185,129,.12);}
-        .segTitle{display:block;font-weight:900;}
-        .segSub{display:block;margin-top:3px;font-size:12px;color:rgba(255,255,255,.62);}
+          {{-- Stats --}}
+          <div class="glass mt-6 rounded-[28px] p-4 sm:p-5">
+            <div class="grid gap-3 sm:grid-cols-4">
+              <div class="rounded-2xl border border-white/10 bg-white/6 p-4 text-left">
+                <p class="text-xs font-semibold text-white/65">Total Terkumpul</p>
+                <p class="mt-1 text-sm font-extrabold text-white">Rp {{ number_format($totalRaised, 0, ',', '.') }}</p>
+              </div>
+              <div class="rounded-2xl border border-white/10 bg-white/6 p-4 text-left">
+                <p class="text-xs font-semibold text-white/65">Target Keseluruhan</p>
+                <p class="mt-1 text-sm font-extrabold text-white">Rp {{ number_format($totalTarget, 0, ',', '.') }}</p>
+              </div>
+              <div class="rounded-2xl border border-white/10 bg-white/6 p-4 text-left">
+                <p class="text-xs font-semibold text-white/65">Donatur</p>
+                <p class="mt-1 text-sm font-extrabold text-white">{{ number_format($totalDonors, 0, ',', '.') }}</p>
+              </div>
+              <div class="rounded-2xl border border-white/10 bg-white/6 p-4 text-left">
+                <p class="text-xs font-semibold text-white/65">Campaign Aktif</p>
+                <p class="mt-1 text-sm font-extrabold text-white">{{ $activeCampaigns }}</p>
+              </div>
+            </div>
 
-        .grid2{display:grid;grid-template-columns:1fr;gap:12px;}
-        .grid3{display:grid;grid-template-columns:1fr;gap:12px;}
-
-        .submit{
-          cursor:pointer;border:0;border-radius:18px;padding:14px 16px;font-weight:900;font-size:16px;color:#04110c;
-          background:linear-gradient(135deg,var(--gold),var(--primary));box-shadow:0 16px 36px rgba(16,185,129,.18);
-        }
-        .finePrint{margin:0;font-size:12px;color:rgba(255,255,255,.55);}
-        .errorText{margin:0;color:#fca5a5;font-size:12px;}
-
-        /* Sidebar */
-        .sidebar{display:flex;flex-direction:column;gap:12px;}
-        .sideCard{padding:16px;border-radius:24px;}
-        .sideHead{display:flex;gap:12px;align-items:flex-start;}
-        .sideTitle{margin:0;font-size:14px;font-weight:900;}
-        .sideDesc{margin:6px 0 0;font-size:12px;color:rgba(255,255,255,.58);}
-        .sideBody{margin-top:12px;display:flex;flex-direction:column;gap:10px;}
-        .kv{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:rgba(255,255,255,.74);}
-        .kv strong{color:rgba(255,255,255,.92);}
-        .miniProgress{margin-top:6px;padding:10px 12px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);}
-        .miniProgressTop{display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.62);margin-bottom:8px;}
-
-        .recentRow{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08);}
-        .recentRow:last-child{border-bottom:0;padding-bottom:0;}
-        .recentLeft{display:flex;gap:10px;align-items:center;}
-        .avatar{
-          width:38px;height:38px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-weight:900;
-          background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.30);
-        }
-        .avatar.anon{background:rgba(212,175,55,.14);border-color:rgba(212,175,55,.32);}
-        .recentName{font-size:13px;font-weight:900;}
-        .recentTime{font-size:12px;color:rgba(255,255,255,.56);}
-        .recentAmount{font-size:13px;font-weight:900;color:rgba(255,255,255,.90);}
-
-        .payGrid{display:grid;gap:10px;}
-        .payBox{border-radius:18px;padding:12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);}
-        .payTitle{font-size:12px;font-weight:900;}
-        .payValue{margin-top:6px;font-size:12px;color:rgba(255,255,255,.70);}
-        .payBox.blue{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.22);}
-        .payBox.green{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.22);}
-        .payBox.purple{background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.22);}
-
-        /* Campaigns */
-        .campaigns{padding-top:26px;}
-        .sectionHead{text-align:center;margin-bottom:14px;}
-        .sectionKicker{margin:0;font-size:12px;letter-spacing:.34em;color:rgba(197,255,232,.78);}
-        .sectionTitle{margin:10px 0 0;font-size:clamp(22px,3vw,34px);}
-        .sectionSub{margin:10px auto 0;max-width:760px;color:rgba(220,255,245,.75);}
-
-        .campaignGrid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:14px;}
-        .campCard{overflow:hidden;border-radius:24px;}
-        .campMedia{position:relative;height:160px;background-size:cover;background-position:center;}
-        .campOverlay{position:absolute;inset:0;background:linear-gradient(to right, rgba(5,9,20,.76), rgba(16,185,129,.22), rgba(212,175,55,.10));}
-        .campBadge{
-          position:absolute;top:12px;right:12px;font-size:12px;font-weight:900;color:rgba(255,255,255,.90);
-          background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);padding:8px 10px;border-radius:999px;
-        }
-        .campIcon{
-          position:absolute;left:12px;bottom:12px;width:46px;height:46px;border-radius:16px;display:flex;align-items:center;justify-content:center;
-          background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);font-size:20px;
-        }
-        .campBody{padding:14px;}
-        .campTitle{margin:0;font-size:16px;font-weight:900;}
-        .campDesc{
-          margin:8px 0 0;color:rgba(255,255,255,.72);font-size:13px;line-height:1.55;
-          display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
-        }
-        .campKv{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
-        .kvRow{display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.66);}
-        .kvRow strong{color:rgba(255,255,255,.90);}
-        .btnCamp{
-          margin-top:12px;width:100%;border:0;cursor:pointer;padding:12px 14px;border-radius:16px;font-weight:900;color:#04110c;
-          background:linear-gradient(135deg,var(--gold),var(--primary));
-        }
-
-        /* Newsletter */
-        .newsletter{padding:26px 0 18px;}
-        .newsletterInner{padding:18px;text-align:center;border-radius:24px;}
-        .newsletterTitle{margin:0;font-size:clamp(20px,2.6vw,28px);font-weight:900;}
-        .newsletterSub{margin:8px auto 0;max-width:720px;color:rgba(220,255,245,.75);}
-        .newsletterForm{margin-top:14px;display:flex;gap:10px;flex-direction:column;}
-        .newsletterInput{
-          flex:1;border-radius:16px;border:1px solid rgba(255,255,255,.14);
-          background:rgba(255,255,255,.06);color:rgba(255,255,255,.92);padding:12px 14px;outline:none;
-        }
-        .newsletterInput::placeholder{color:rgba(255,255,255,.55);}
-        .newsletterBtn{cursor:pointer;border:0;border-radius:16px;padding:12px 14px;font-weight:900;color:#04110c;background:rgba(255,255,255,.92);}
-
-        /* Sticky CTA */
-        .stickyCta{position:fixed;left:12px;right:12px;bottom:12px;z-index:50;display:flex;gap:10px;}
-        .stickyBtn{flex:1;border-radius:16px;padding:12px 14px;font-weight:900;cursor:pointer;}
-        .stickyBtn.primary{border:0;color:#04110c;background:linear-gradient(135deg,var(--gold),var(--primary));}
-        .stickyBtn.ghost{color:rgba(255,255,255,.90);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);}
-
-        @media (min-width: 640px){
-          .statRow{grid-template-columns:repeat(4,minmax(0,1fr));}
-          .amountGrid{grid-template-columns:repeat(3,minmax(0,1fr));}
-          .segmented{grid-template-columns:1fr 1fr;}
-          .grid2{grid-template-columns:1fr 1fr;}
-          .grid3{grid-template-columns:repeat(3,minmax(0,1fr));}
-          .newsletterForm{flex-direction:row;}
-        }
-        @media (min-width: 980px){
-          .mainGrid{grid-template-columns:1.25fr .75fr;gap:16px;}
-          .campaignGrid{grid-template-columns:repeat(3,minmax(0,1fr));}
-          .stickyCta{display:none;}
-        }
-    </style>
-
-    <div class="page">
-        {{-- HERO / JUMBOTRON --}}
-        <header class="hero">
-            <div class="heroBg" style="background-image:url('{{ $bgImage }}')"></div>
-            <div class="heroOverlay"></div>
-            <div class="container heroInner">
-                <div class="heroBadge" aria-hidden="true">❤</div>
-                <p class="heroKicker">DONASI MASJID</p>
-                <h1 class="heroTitle">Donasi Masjid Agung Al-A'la</h1>
-                <p class="heroSubtitle">
-                    Bergabung dalam kebaikan dengan mendukung program masjid secara transparan dan berdampak.
-                </p>
-
-                <div class="heroStats glass">
-                    <div class="statRow">
-                        <div class="stat">
-                            <p class="statLabel">Total Terkumpul</p>
-                            <p class="statValue">Rp {{ number_format($totalRaised, 0, ',', '.') }}</p>
-                        </div>
-                        <div class="stat">
-                            <p class="statLabel">Target Keseluruhan</p>
-                            <p class="statValue">Rp {{ number_format($totalTarget, 0, ',', '.') }}</p>
-                        </div>
-                        <div class="stat">
-                            <p class="statLabel">Donatur</p>
-                            <p class="statValue">{{ number_format($totalDonors, 0, ',', '.') }}</p>
-                        </div>
-                        <div class="stat">
-                            <p class="statLabel">Campaign Aktif</p>
-                            <p class="statValue">{{ $activeCampaigns }}</p>
-                        </div>
-                    </div>
-
-                    <div class="progressWrap" aria-label="Progress keseluruhan donasi">
-                        <div class="progressTop">
-                            <span class="progressText">Progress keseluruhan</span>
-                            <span class="progressText">{{ number_format($overallProgress, 0) }}%</span>
-                        </div>
-                        <div class="progressTrack">
-                            <div class="progressBar" style="width: {{ $overallProgress }}%"></div>
-                        </div>
-                    </div>
+            <div class="mt-4 rounded-2xl border border-white/10 bg-white/6 p-4">
+              <div class="flex items-center justify-between text-xs font-semibold text-white/70">
+                <span>Progress keseluruhan</span>
+                <span>{{ number_format($overallProgress, 0) }}%</span>
+              </div>
+              <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                <div class="h-full rounded-full"
+                  style="width: {{ $overallProgress }}%; background: linear-gradient(90deg, var(--accent), #0F4A3A);">
                 </div>
-
-                <div class="heroActions">
-                    <button class="btnPrimary" type="button" data-scroll="#donation-form">Donasi Sekarang</button>
-                    <button class="btnGhost" type="button" data-scroll="#campaigns">Lihat Campaign</button>
-                </div>
-            </div>
-        </header>
-
-        {{-- MAIN --}}
-        <main class="container mainGrid" id="donation-form">
-            {{-- FORM --}}
-            <section class="glass card">
-                <div class="cardHead">
-                    <div class="cardTitleRow">
-                        <span class="iconCircle" aria-hidden="true">🎁</span>
-                        <div>
-                            <h2 class="cardTitle">Form Donasi</h2>
-                            <p class="cardDesc">Isi data berikut untuk mengirim donasi terbaik Anda</p>
-                        </div>
-                    </div>
-                </div>
-
-                <form class="cardBody"
-                      id="donationForm"
-                      method="{{ $hasTransaksiRoute ? 'POST' : 'GET' }}"
-                      action="{{ $hasTransaksiRoute && $defaultDonasiId ? route('donasi.transaksi', ['donasi' => $defaultDonasiId]) : url()->current() }}"
-                      data-action-template="{{ $donasiActionTemplate }}"
-                      data-default-donasi="{{ $defaultDonasiId }}"
-                      data-initial-amount="{{ $selectedAmount }}">
-                    @if ($hasTransaksiRoute)
-                        @csrf
-                    @endif
-
-                    <div class="field">
-                        <label class="label">Pilih Campaign</label>
-                        <select class="select" name="campaign_id" id="campaign_id">
-                            <option value="">Donasi Umum</option>
-                            @foreach ($donasis as $c)
-                                <option value="{{ $c->id }}">{{ $c->judul }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="field">
-                        <label class="label">Pilih Jumlah Donasi</label>
-
-                        <div class="amountGrid">
-                            @foreach ($presetAmounts as $a)
-                                <button type="button" class="amountPill js-amount" data-amount="{{ $a }}">
-                                    Rp {{ number_format($a, 0, ',', '.') }}
-                                </button>
-                            @endforeach
-                        </div>
-
-                        <input class="input" type="number" min="10000" name="amount_custom" id="amount_custom"
-                               placeholder="Jumlah custom (contoh: 125000)"
-                               value="{{ $selectedAmount ?: '' }}">
-
-                        <input type="hidden" name="jumlah" id="amount_final" value="{{ $selectedAmount }}">
-
-                        <div class="hintRow">
-                            <span class="hint">Nominal dipilih:</span>
-                            <span class="hintStrong" id="amount_preview">Rp {{ $formattedSelectedAmount }}</span>
-                        </div>
-                        @error('jumlah')
-                            <p class="errorText">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="field">
-                        <label class="label">Jenis Donasi</label>
-                        <div class="segmented">
-                            <button type="button" class="segBtn active js-frequency" data-value="once">
-                                <span class="segTitle">Donasi Sekali</span>
-                                <span class="segSub">Satu kali pembayaran</span>
-                            </button>
-                            <button type="button" class="segBtn js-frequency" data-value="monthly">
-                                <span class="segTitle">Donasi Bulanan</span>
-                                <span class="segSub">Komitmen rutin tiap bulan</span>
-                            </button>
-                        </div>
-                        <input type="hidden" name="frequency" id="frequency" value="once">
-                    </div>
-
-                    <div class="grid3">
-                        <div class="field">
-                            <label class="label">Nama Lengkap</label>
-                            <input class="input" name="name" placeholder="Masukkan nama" value="{{ old('name') }}">
-                        </div>
-                        <div class="field">
-                            <label class="label">Email</label>
-                            <input class="input" type="email" name="email" placeholder="email@example.com" value="{{ old('email') }}">
-                        </div>
-                        <div class="field">
-                            <label class="label">No. WhatsApp</label>
-                            <input class="input" name="whatsapp" placeholder="08XXXXXXXXXX" value="{{ old('whatsapp') }}">
-                        </div>
-                    </div>
-
-                    <div class="grid2">
-                        <div class="field">
-                            <label class="label">Metode Pembayaran</label>
-                            <select class="select" name="pay_method">
-                                <option value="transfer">Transfer Bank</option>
-                                <option value="ewallet">E-Wallet</option>
-                                <option value="card">Kartu Kredit/Debit</option>
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label class="label">Kategori</label>
-                            <select class="select" name="category">
-                                <option value="general">Kategori Umum</option>
-                                <option value="pembangunan">Pembangunan</option>
-                                <option value="pendidikan">Pendidikan</option>
-                                <option value="sosial">Sosial</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <label class="label">Pesan / Doa (opsional)</label>
-                        <textarea class="textarea" rows="3" name="message" placeholder="Tuliskan pesan atau doa...">{{ old('message') }}</textarea>
-                    </div>
-
-                    <button class="submit" type="submit">Donasi Sekarang</button>
-                    <p class="finePrint">
-                        Pembayaran diproses via Xendit (sandbox). Anda akan diarahkan ke halaman pembayaran setelah submit.
-                    </p>
-                </form>
-            </section>
-
-            {{-- SIDEBAR --}}
-            <aside class="sidebar">
-                {{-- Impact --}}
-                <section class="glass sideCard">
-                    <div class="sideHead">
-                        <span class="iconCircle" aria-hidden="true">📈</span>
-                        <div>
-                            <h3 class="sideTitle">Dampak Kebaikan</h3>
-                            <p class="sideDesc">Ringkasan progress donasi</p>
-                        </div>
-                    </div>
-
-                    <div class="sideBody">
-                        <div class="kv"><span>Total Dana Terkumpul</span><strong>Rp {{ number_format($totalRaised, 0, ',', '.') }}</strong></div>
-                        <div class="kv"><span>Target Keseluruhan</span><strong>Rp {{ number_format($totalTarget, 0, ',', '.') }}</strong></div>
-                        <div class="kv"><span>Donatur Terdata</span><strong>{{ number_format($totalDonors) }} orang</strong></div>
-                        <div class="kv"><span>Campaign Aktif</span><strong>{{ $activeCampaigns }}</strong></div>
-
-                        <div class="miniProgress">
-                            <div class="miniProgressTop">
-                                <span>Progress</span>
-                                <span>{{ number_format($overallProgress, 0) }}%</span>
-                            </div>
-                            <div class="progressTrack">
-                                <div class="progressBar" style="width: {{ $overallProgress }}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {{-- Recent --}}
-                <section class="glass sideCard">
-                    <div class="sideHead">
-                        <span class="iconCircle" aria-hidden="true">👥</span>
-                        <div>
-                            <h3 class="sideTitle">Donasi Terbaru</h3>
-                            <p class="sideDesc">Update terbaru dari jamaah</p>
-                        </div>
-                    </div>
-
-                    <div class="sideBody">
-                        @foreach ($recentList as $d)
-                            <div class="recentRow">
-                                <div class="recentLeft">
-                                    <div class="avatar {{ $d['anonymous'] ? 'anon' : '' }}">
-                                        {{ $d['anonymous'] ? '❤' : strtoupper(substr($d['name'], 0, 1)) }}
-                                    </div>
-                                    <div>
-                                        <div class="recentName">{{ $d['name'] }}</div>
-                                        <div class="recentTime">{{ $d['time'] }}</div>
-                                    </div>
-                                </div>
-                                <div class="recentAmount">Rp {{ number_format($d['amount'], 0, ',', '.') }}</div>
-                            </div>
-                        @endforeach
-                    </div>
-                </section>
-
-                {{-- Payment info --}}
-                <section class="glass sideCard">
-                    <div class="sideHead">
-                        <span class="iconCircle" aria-hidden="true">💳</span>
-                        <div>
-                            <h3 class="sideTitle">Info Pembayaran</h3>
-                            <p class="sideDesc">Contoh kanal pembayaran</p>
-                        </div>
-                    </div>
-
-                    <div class="sideBody payGrid">
-                        <div class="payBox blue">
-                            <div class="payTitle">BCA Virtual Account</div>
-                            <div class="payValue">1234 5678 9012 3456</div>
-                        </div>
-                        <div class="payBox green">
-                            <div class="payTitle">GoPay / OVO</div>
-                            <div class="payValue">0812-3456-7890</div>
-                        </div>
-                        <div class="payBox purple">
-                            <div class="payTitle">QRIS</div>
-                            <div class="payValue">Scan di aplikasi favorit</div>
-                        </div>
-                    </div>
-                </section>
-            </aside>
-        </main>
-
-        {{-- CAMPAIGNS --}}
-        <section class="container campaigns" id="campaigns">
-            <div class="sectionHead">
-                <p class="sectionKicker">CAMPAIGN AKTIF</p>
-                <h2 class="sectionTitle">Program Donasi Masjid</h2>
-                <p class="sectionSub">Pilih campaign yang ingin Anda dukung. Semua donasi dicatat secara transparan.</p>
+              </div>
             </div>
 
-            <div class="campaignGrid">
-                @foreach ($donasis as $c)
-                    @php
-                        $p = $c->target_dana > 0 ? min(100, max(0, ($c->dana_terkumpul / $c->target_dana) * 100)) : 0;
-                        $left = $daysLeft($c->tanggal_selesai);
-                        $donors = (int) ($c->transaksi_donasis_count ?? 0);
-                    @endphp
-
-                    <article class="glass campCard">
-                        <div class="campMedia" style="background-image:url('{{ $c->poster ?? $posterFallback }}')">
-                            <div class="campOverlay"></div>
-                            <div class="campBadge">{{ is_null($left) ? 'Fleksibel' : 'Target ' . $left . ' hari' }}</div>
-                            <div class="campIcon" aria-hidden="true">🎯</div>
-                        </div>
-
-                        <div class="campBody">
-                            <h3 class="campTitle">{{ $c->judul }}</h3>
-                            <p class="campDesc">{{ \Illuminate\Support\Str::limit(strip_tags($c->deskripsi), 160) }}</p>
-
-                            <div class="campKv">
-                                <div class="kvRow"><span>Terkumpul</span><strong>Rp {{ number_format($c->dana_terkumpul, 0, ',', '.') }}</strong></div>
-                                <div class="progressTrack"><div class="progressBar" style="width: {{ $p }}%"></div></div>
-                                <div class="kvRow"><span>Target</span><strong>Rp {{ number_format($c->target_dana, 0, ',', '.') }}</strong></div>
-                                <div class="kvRow"><span>Donatur</span><strong>{{ number_format($donors) }} orang</strong></div>
-                            </div>
-
-                            <button class="btnCamp" type="button" data-scroll="#donation-form" data-campaign-id="{{ $c->id }}">Donasi Sekarang</button>
-                        </div>
-                    </article>
-                @endforeach
+            <div class="mt-4 flex flex-wrap justify-center gap-2">
+              <button type="button" data-scroll="#donation-form"
+                class="inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-[#13392f] hover:brightness-110"
+                style="background: var(--accent);">
+                {!! $ico['heart'] !!} Donasi Sekarang
+              </button>
+              <button type="button" data-scroll="#campaigns"
+                class="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/6 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10">
+                {!! $ico['arrowDown'] !!} Lihat Campaign
+              </button>
             </div>
+          </div>
+        </div>
+      </div>
+    </header>
 
-            <div style="margin-top:14px;">
-                {{ $donasis->links() }}
+    {{-- MAIN --}}
+    <main id="donation-form" class="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[1.35fr_.65fr] lg:px-8">
+
+      {{-- FORM CARD --}}
+      <section class="glass overflow-hidden rounded-[28px]">
+        <div class="border-b border-white/10 bg-white/6 px-6 py-5">
+          <div class="flex items-start gap-3">
+            <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-white/6 text-white">
+              {!! $ico['gift'] !!}
+            </span>
+            <div>
+              <h2 class="text-base font-extrabold text-white">Form Donasi</h2>
+              <p class="mt-1 text-sm text-white/70">Isi data dengan benar agar pembayaran lancar.</p>
             </div>
-        </section>
-
-        {{-- NEWSLETTER --}}
-        <section class="container newsletter">
-            <div class="glass newsletterInner">
-                <h2 class="newsletterTitle">Saling Menguatkan dalam Kebaikan</h2>
-                <p class="newsletterSub">Dapatkan update campaign donasi terbaru langsung ke email Anda.</p>
-
-                <form class="newsletterForm" method="{{ $newsletterMethod }}" action="{{ $newsletterAction }}">
-                    @if ($newsletterHasRoute)
-                        @csrf
-                    @endif
-                    <input class="newsletterInput" type="email" name="email" placeholder="Email Anda" required>
-                    <button class="newsletterBtn" type="submit">Berlangganan</button>
-                </form>
-            </div>
-        </section>
-
-        {{-- MOBILE STICKY CTA --}}
-        <div class="stickyCta">
-            <button class="stickyBtn primary" type="button" data-scroll="#donation-form">Donasi</button>
-            <button class="stickyBtn ghost" type="button" data-scroll="#campaigns">Campaign</button>
+          </div>
         </div>
 
-        {{-- JS kecil: scroll + preset amount + frequency --}}
-        <script>
-            (function () {
-                const rupiah = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
+        <form class="space-y-5 px-6 py-6"
+              id="donationForm"
+              method="{{ $hasTransaksiRoute ? 'POST' : 'GET' }}"
+              action="{{ $hasTransaksiRoute && $defaultDonasiId ? route('donasi.transaksi', ['donasi' => $defaultDonasiId]) : url()->current() }}"
+              data-action-template="{{ $donasiActionTemplate }}"
+              data-default-donasi="{{ $defaultDonasiId }}"
+              data-initial-amount="{{ $selectedAmount }}">
+          @if ($hasTransaksiRoute)
+            @csrf
+          @endif
 
-                // smooth scroll
-                document.querySelectorAll("[data-scroll]").forEach((btn) => {
-                    btn.addEventListener("click", () => {
-                        const target = btn.getAttribute("data-scroll");
-                        const el = document.querySelector(target);
-                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                    });
-                });
+          <div>
+            <label class="text-sm font-semibold text-white/80">Pilih Campaign</label>
+            <select name="campaign_id" id="campaign_id"
+              class="field-light mt-2 h-12 w-full rounded-2xl border px-4 text-sm">
+              <option value="">Donasi Umum</option>
+              @foreach ($donasis as $c)
+                <option value="{{ $c->id }}">{{ $c->judul }}</option>
+              @endforeach
+            </select>
+          </div>
 
-                // update form action when campaign dipilih
-                const form = document.getElementById("donationForm");
-                const campaignSelect = document.getElementById("campaign_id");
-                const actionTemplate = form?.dataset.actionTemplate || "";
-                const defaultDonasiId = form?.dataset.defaultDonasi || "";
+          <div>
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-semibold text-white/80">Pilih Jumlah Donasi</label>
+              <span class="text-xs font-semibold text-white/70">Dipilih: <span id="amount_preview" class="text-white">Rp {{ $formattedSelectedAmount }}</span></span>
+            </div>
 
-                if (form && campaignSelect && actionTemplate.includes("__ID__")) {
-                    const updateAction = () => {
-                        const chosen = campaignSelect.value || defaultDonasiId;
-                        if (chosen) {
-                            form.action = actionTemplate.replace("__ID__", chosen);
-                        }
-                    };
-                    campaignSelect.addEventListener("change", updateAction);
-                    updateAction();
-                }
+            <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+              @foreach ($presetAmounts as $a)
+                <button type="button"
+                  class="js-amount rounded-2xl border border-white/12 bg-white/6 px-4 py-3 text-left text-sm font-semibold text-white hover:bg-white/10"
+                  data-amount="{{ $a }}">
+                  Rp {{ number_format($a, 0, ',', '.') }}
+                </button>
+              @endforeach
+            </div>
 
-                const campaignButtons = Array.from(document.querySelectorAll("[data-campaign-id]"));
-                if (campaignSelect && campaignButtons.length) {
-                    campaignButtons.forEach((btn) => {
-                        btn.addEventListener("click", () => {
-                            const chosen = btn.getAttribute("data-campaign-id") || "";
-                            campaignSelect.value = chosen;
-                            campaignSelect.dispatchEvent(new Event("change"));
-                        });
-                    });
-                }
+            <input
+              class="field-light mt-3 h-12 w-full rounded-2xl border px-4 text-sm"
+              type="number" min="10000" name="amount_custom" id="amount_custom"
+              placeholder="Atau nominal custom (contoh: 125000)"
+              value="{{ $selectedAmount ?: '' }}">
 
-                // amount preset
-                const amountButtons = Array.from(document.querySelectorAll(".js-amount"));
-                const amountCustom = document.getElementById("amount_custom");
-                const amountFinal = document.getElementById("amount_final");
-                const amountPreview = document.getElementById("amount_preview");
-                const initialAmount = parseInt(form?.dataset.initialAmount || "0", 10) || 0;
+            <input type="hidden" name="jumlah" id="amount_final" value="{{ $selectedAmount }}">
 
-                function setActiveAmount(btn) {
-                    amountButtons.forEach((b) => b.classList.remove("active"));
-                    if (btn) btn.classList.add("active");
-                }
+            @error('jumlah')
+              <p class="mt-2 text-xs font-semibold text-red-200">{{ $message }}</p>
+            @enderror
+          </div>
 
-                function setAmount(n, { fromCustom = false } = {}) {
-                    const clean = Math.max(0, parseInt(n || "0", 10));
-                    if (amountFinal) amountFinal.value = String(clean);
-                    if (amountPreview) amountPreview.textContent = rupiah(clean || 0);
-                    if (!fromCustom && amountCustom) {
-                        amountCustom.value = clean ? clean : "";
-                    }
-                }
+          <div>
+            <label class="text-sm font-semibold text-white/80">Jenis Donasi</label>
+            <div class="mt-3 grid gap-2 sm:grid-cols-2">
+              <button type="button"
+                class="segBtn js-frequency rounded-2xl border border-white/12 bg-white/6 px-4 py-3 text-left text-sm font-semibold text-white hover:bg-white/10 active"
+                data-value="once">
+                Donasi Sekali
+                <span class="mt-1 block text-xs font-medium text-white/65">Satu kali pembayaran</span>
+              </button>
+              <button type="button"
+                class="segBtn js-frequency rounded-2xl border border-white/12 bg-white/6 px-4 py-3 text-left text-sm font-semibold text-white hover:bg-white/10"
+                data-value="monthly">
+                Donasi Bulanan
+                <span class="mt-1 block text-xs font-medium text-white/65">Komitmen rutin tiap bulan</span>
+              </button>
+            </div>
+            <input type="hidden" name="frequency" id="frequency" value="once">
+          </div>
 
-                // default
-                setAmount(initialAmount);
-                const defaultBtn = amountButtons.find((b) => b.getAttribute("data-amount") === String(initialAmount));
-                setActiveAmount(defaultBtn || null);
+          <div class="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label class="text-sm font-semibold text-white/80">Nama</label>
+              <input class="field-light mt-2 h-12 w-full rounded-2xl border px-4 text-sm"
+                     name="name" placeholder="Nama lengkap" value="{{ old('name') }}">
+            </div>
+            <div>
+              <label class="text-sm font-semibold text-white/80">Email</label>
+              <input class="field-light mt-2 h-12 w-full rounded-2xl border px-4 text-sm"
+                     type="email" name="email" placeholder="email@example.com" value="{{ old('email') }}">
+            </div>
+            <div>
+              <label class="text-sm font-semibold text-white/80">WhatsApp</label>
+              <input class="field-light mt-2 h-12 w-full rounded-2xl border px-4 text-sm"
+                     name="whatsapp" placeholder="08xxxxxxxxxx" value="{{ old('whatsapp') }}">
+            </div>
+          </div>
 
-                amountButtons.forEach((btn) => {
-                    btn.addEventListener("click", () => {
-                        const n = parseInt(btn.getAttribute("data-amount") || "0", 10);
-                        if (n > 0) {
-                            setActiveAmount(btn);
-                            setAmount(n);
-                        }
-                    });
-                });
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label class="text-sm font-semibold text-white/80">Metode Pembayaran</label>
+              <select class="field-light mt-2 h-12 w-full rounded-2xl border px-4 text-sm"
+                      name="pay_method">
+                <option value="transfer">Transfer Bank</option>
+                <option value="ewallet">E-Wallet</option>
+                <option value="card">Kartu Kredit/Debit</option>
+              </select>
+            </div>
 
-                if (amountCustom) {
-                    amountCustom.addEventListener("input", () => {
-                        const n = parseInt(amountCustom.value || "0", 10);
-                        setActiveAmount(null);
-                        setAmount(n, { fromCustom: true });
-                    });
-                }
+            <div>
+              <label class="text-sm font-semibold text-white/80">Kategori</label>
+              <select class="field-light mt-2 h-12 w-full rounded-2xl border px-4 text-sm"
+                      name="category">
+                <option value="general">Kategori Umum</option>
+                <option value="pembangunan">Pembangunan</option>
+                <option value="pendidikan">Pendidikan</option>
+                <option value="sosial">Sosial</option>
+              </select>
+            </div>
+          </div>
 
-                // frequency
-                const freqButtons = Array.from(document.querySelectorAll(".js-frequency"));
-                const freqInput = document.getElementById("frequency");
+          <div>
+            <label class="text-sm font-semibold text-white/80">Pesan / Doa (opsional)</label>
+            <textarea rows="3"
+              class="field-light mt-2 w-full rounded-2xl border px-4 py-3 text-sm"
+              name="message" placeholder="Tuliskan pesan atau doa...">{{ old('message') }}</textarea>
+          </div>
 
-                freqButtons.forEach((btn) => {
-                    btn.addEventListener("click", () => {
-                        freqButtons.forEach((b) => b.classList.remove("active"));
-                        btn.classList.add("active");
-                        const v = btn.getAttribute("data-value") || "once";
-                        freqInput.value = v;
-                    });
-                });
-            })();
-        </script>
+          <button type="submit"
+            class="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-[#13392f] hover:brightness-110"
+            style="background: var(--accent);">
+            {!! $ico['heart'] !!} Donasi Sekarang
+          </button>
+
+          <p class="text-xs text-white/60">
+            Pembayaran diproses via Xendit. Setelah submit Anda akan diarahkan ke halaman pembayaran.
+          </p>
+        </form>
+      </section>
+
+      {{-- SIDEBAR --}}
+      <aside class="space-y-4">
+        {{-- Impact --}}
+        <section class="glass rounded-[28px] p-5">
+          <div class="flex items-start gap-3">
+            <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-white/6 text-white">
+              {!! $ico['chart'] !!}
+            </span>
+            <div>
+              <h3 class="text-sm font-extrabold text-white">Ringkasan Dampak</h3>
+              <p class="mt-1 text-xs text-white/70">Progress total seluruh campaign.</p>
+            </div>
+          </div>
+
+          <div class="mt-4 space-y-2 text-sm text-white/80">
+            <div class="flex items-center justify-between"><span>Total Terkumpul</span><span class="font-extrabold text-white">Rp {{ number_format($totalRaised, 0, ',', '.') }}</span></div>
+            <div class="flex items-center justify-between"><span>Target</span><span class="font-extrabold text-white">Rp {{ number_format($totalTarget, 0, ',', '.') }}</span></div>
+            <div class="flex items-center justify-between"><span>Donatur</span><span class="font-extrabold text-white">{{ number_format($totalDonors) }} orang</span></div>
+            <div class="flex items-center justify-between"><span>Campaign</span><span class="font-extrabold text-white">{{ $activeCampaigns }}</span></div>
+
+            <div class="mt-3 rounded-2xl border border-white/10 bg-white/6 p-4">
+              <div class="flex items-center justify-between text-xs font-semibold text-white/70">
+                <span>Progress</span>
+                <span>{{ number_format($overallProgress, 0) }}%</span>
+              </div>
+              <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                <div class="h-full rounded-full"
+                  style="width: {{ $overallProgress }}%; background: linear-gradient(90deg, var(--accent), #0F4A3A);">
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {{-- Recent --}}
+        <section class="glass rounded-[28px] p-5">
+          <div class="flex items-start gap-3">
+            <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-white/6 text-white">
+              {!! $ico['users'] !!}
+            </span>
+            <div>
+              <h3 class="text-sm font-extrabold text-white">Donasi Terbaru</h3>
+              <p class="mt-1 text-xs text-white/70">Update terbaru dari jamaah.</p>
+            </div>
+          </div>
+
+          <div class="mt-4 divide-y divide-white/10">
+            @foreach ($recentList as $d)
+              @php $initial = $d['anonymous'] ? 'A' : strtoupper(mb_substr($d['name'], 0, 1)); @endphp
+              <div class="flex items-center justify-between gap-3 py-3">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-full border text-sm font-extrabold
+                    {{ $d['anonymous'] ? 'border-[rgba(231,177,75,0.35)] bg-[rgba(231,177,75,0.14)] text-white' : 'border-[rgba(16,185,129,0.35)] bg-[rgba(16,185,129,0.14)] text-white' }}">
+                    {{ $initial }}
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-sm font-bold text-white/95 truncate">{{ $d['name'] }}</p>
+                    <p class="text-xs text-white/60">{{ $d['time'] }}</p>
+                  </div>
+                </div>
+
+                <p class="text-sm font-extrabold text-white">
+                  Rp {{ number_format($d['amount'], 0, ',', '.') }}
+                </p>
+              </div>
+            @endforeach
+          </div>
+        </section>
+
+        {{-- Payment Info --}}
+        <section class="glass rounded-[28px] p-5">
+          <div class="flex items-start gap-3">
+            <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-white/6 text-white">
+              {!! $ico['card'] !!}
+            </span>
+            <div>
+              <h3 class="text-sm font-extrabold text-white">Info Pembayaran</h3>
+              <p class="mt-1 text-xs text-white/70">Contoh kanal pembayaran (bisa kamu ganti dinamis).</p>
+            </div>
+          </div>
+
+          <div class="mt-4 space-y-2">
+            <div class="rounded-2xl border border-white/10 bg-white/6 p-4">
+              <p class="text-xs font-semibold text-white/70">BCA Virtual Account</p>
+              <p class="mt-1 text-sm font-extrabold text-white">1234 5678 9012 3456</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/6 p-4">
+              <p class="text-xs font-semibold text-white/70">GoPay / OVO</p>
+              <p class="mt-1 text-sm font-extrabold text-white">0812-3456-7890</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/6 p-4">
+              <p class="text-xs font-semibold text-white/70">QRIS</p>
+              <p class="mt-1 text-sm font-extrabold text-white">Scan di aplikasi favorit</p>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    {{-- CAMPAIGNS --}}
+    <section id="campaigns" class="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <span class="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-4 py-2 text-xs font-semibold text-white/90">
+          {!! $ico['target'] !!} CAMPAIGN AKTIF
+        </span>
+        <h2 class="mt-3 text-2xl font-extrabold text-white sm:text-3xl">Program Donasi Masjid</h2>
+        <p class="mx-auto mt-2 max-w-2xl text-sm text-white/75">
+          Pilih campaign yang ingin Anda dukung. Semua donasi dicatat secara transparan.
+        </p>
+      </div>
+
+      <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        @foreach ($donasis as $c)
+          @php
+            $p = $c->target_dana > 0 ? min(100, max(0, ($c->dana_terkumpul / $c->target_dana) * 100)) : 0;
+            $left = $daysLeft($c->tanggal_selesai);
+            $donors = (int) ($c->transaksi_donasis_count ?? 0);
+            $poster = $c->poster ?? $posterFallback;
+          @endphp
+
+          <article class="glass overflow-hidden rounded-[28px]">
+            <div class="relative h-44">
+              <img src="{{ $poster }}" alt="{{ $c->judul }}"
+                   class="h-full w-full object-cover opacity-90" referrerpolicy="no-referrer">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+
+              <span class="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/85 px-3 py-1 text-[11px] font-extrabold text-[#13392f]">
+                {!! $ico['target'] !!} Program Masjid
+              </span>
+
+              <span class="absolute right-3 top-3 inline-flex items-center rounded-full border border-white/12 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white">
+                {{ is_null($left) ? 'Fleksibel' : $left . ' hari lagi' }}
+              </span>
+            </div>
+
+            <div class="p-5">
+              <h3 class="text-base font-extrabold text-white line-clamp-2">{{ $c->judul }}</h3>
+              <p class="mt-2 text-sm text-white/70 line-clamp-3">
+                {{ \Illuminate\Support\Str::limit(strip_tags($c->deskripsi), 160) }}
+              </p>
+
+              <div class="mt-4 rounded-2xl border border-white/10 bg-white/6 p-4">
+                <div class="flex items-center justify-between text-xs font-semibold text-white/70">
+                  <span>Terkumpul</span>
+                  <span>Rp {{ number_format($c->dana_terkumpul, 0, ',', '.') }}</span>
+                </div>
+
+                <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                  <div class="h-full rounded-full"
+                    style="width: {{ $p }}%; background: linear-gradient(90deg, var(--accent), #0F4A3A);">
+                  </div>
+                </div>
+
+                <div class="mt-2 flex items-center justify-between text-xs text-white/70">
+                  <span>Target: <span class="font-semibold text-white">Rp {{ number_format($c->target_dana, 0, ',', '.') }}</span></span>
+                  <span>Donatur: <span class="font-semibold text-white">{{ number_format($donors) }}</span></span>
+                </div>
+              </div>
+
+              <button type="button"
+                class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-[#13392f] hover:brightness-110"
+                style="background: var(--accent);"
+                data-scroll="#donation-form"
+                data-campaign-id="{{ $c->id }}">
+                {!! $ico['heart'] !!} Donasi Campaign Ini
+              </button>
+            </div>
+          </article>
+        @endforeach
+      </div>
+
+      <div class="mt-6">
+        {{ $donasis->links() }}
+      </div>
+    </section>
+
+    {{-- NEWSLETTER --}}
+    <section class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
+      <div class="glass rounded-[28px] p-6 text-center">
+        <div class="mx-auto flex max-w-2xl flex-col items-center">
+          <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-white/6 text-white">
+            {!! $ico['mail'] !!}
+          </span>
+          <h2 class="mt-3 text-xl font-extrabold text-white">Saling Menguatkan dalam Kebaikan</h2>
+          <p class="mt-2 text-sm text-white/70">
+            Dapatkan update campaign donasi terbaru langsung ke email Anda.
+          </p>
+
+          <form class="mt-4 flex w-full max-w-xl flex-col gap-2 sm:flex-row"
+                method="{{ $newsletterMethod }}" action="{{ $newsletterAction }}">
+            @if ($newsletterHasRoute)
+              @csrf
+            @endif
+            <input type="email" name="email" required
+              class="field-light h-12 w-full flex-1 rounded-2xl border px-4 text-sm"
+              placeholder="Email Anda">
+            <button type="submit"
+              class="h-12 rounded-2xl px-5 text-sm font-semibold text-[#13392f] hover:brightness-110"
+              style="background: var(--accent);">
+              Berlangganan
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    {{-- MOBILE STICKY CTA --}}
+    <div class="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#13392f]/85 p-3 backdrop-blur lg:hidden">
+      <div class="mx-auto max-w-7xl grid grid-cols-2 gap-2">
+        <button type="button" data-scroll="#donation-form"
+          class="w-full rounded-2xl px-4 py-3 text-sm font-semibold text-[#13392f]"
+          style="background: var(--accent);">
+          Donasi
+        </button>
+        <button type="button" data-scroll="#campaigns"
+          class="w-full rounded-2xl border border-white/12 bg-white/6 px-4 py-3 text-sm font-semibold text-white">
+          Campaign
+        </button>
+      </div>
     </div>
+
+    {{-- JS: scroll + preset amount + frequency + campaign pick --}}
+    <script>
+      (function () {
+        const rupiah = (n) => new Intl.NumberFormat("id-ID", {
+          style: "currency", currency: "IDR", maximumFractionDigits: 0
+        }).format(n || 0);
+
+        // smooth scroll
+        document.querySelectorAll("[data-scroll]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const target = btn.getAttribute("data-scroll");
+            const el = document.querySelector(target);
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        });
+
+        // update form action when campaign dipilih
+        const form = document.getElementById("donationForm");
+        const campaignSelect = document.getElementById("campaign_id");
+        const actionTemplate = form?.dataset.actionTemplate || "";
+        const defaultDonasiId = form?.dataset.defaultDonasi || "";
+
+        if (form && campaignSelect && actionTemplate.includes("__ID__")) {
+          const updateAction = () => {
+            const chosen = campaignSelect.value || defaultDonasiId;
+            if (chosen) form.action = actionTemplate.replace("__ID__", chosen);
+          };
+          campaignSelect.addEventListener("change", updateAction);
+          updateAction();
+        }
+
+        // campaign buttons -> select + change
+        document.querySelectorAll("[data-campaign-id]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const chosen = btn.getAttribute("data-campaign-id") || "";
+            if (campaignSelect) {
+              campaignSelect.value = chosen;
+              campaignSelect.dispatchEvent(new Event("change"));
+            }
+          });
+        });
+
+        // amount preset
+        const amountButtons = Array.from(document.querySelectorAll(".js-amount"));
+        const amountCustom = document.getElementById("amount_custom");
+        const amountFinal = document.getElementById("amount_final");
+        const amountPreview = document.getElementById("amount_preview");
+        const initialAmount = parseInt(form?.dataset.initialAmount || "0", 10) || 0;
+
+        function setActive(btn) {
+          amountButtons.forEach(b => b.classList.remove("ring-2", "ring-[rgba(231,177,75,0.55)]", "bg-white/10"));
+          if (btn) btn.classList.add("ring-2", "ring-[rgba(231,177,75,0.55)]", "bg-white/10");
+        }
+
+        function setAmount(n, { fromCustom = false } = {}) {
+          const clean = Math.max(0, parseInt(n || "0", 10));
+          if (amountFinal) amountFinal.value = String(clean);
+          if (amountPreview) amountPreview.textContent = rupiah(clean);
+          if (!fromCustom && amountCustom) amountCustom.value = clean ? clean : "";
+        }
+
+        setAmount(initialAmount);
+        const defaultBtn = amountButtons.find(b => b.getAttribute("data-amount") === String(initialAmount));
+        setActive(defaultBtn || null);
+
+        amountButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const n = parseInt(btn.getAttribute("data-amount") || "0", 10);
+            setActive(btn);
+            setAmount(n);
+          });
+        });
+
+        if (amountCustom) {
+          amountCustom.addEventListener("input", () => {
+            setActive(null);
+            setAmount(amountCustom.value, { fromCustom: true });
+          });
+        }
+
+        // frequency
+        const freqButtons = Array.from(document.querySelectorAll(".js-frequency"));
+        const freqInput = document.getElementById("frequency");
+        freqButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            freqButtons.forEach(b => b.classList.remove("ring-2", "ring-[rgba(231,177,75,0.55)]", "bg-white/10"));
+            btn.classList.add("ring-2", "ring-[rgba(231,177,75,0.55)]", "bg-white/10");
+            if (freqInput) freqInput.value = btn.getAttribute("data-value") || "once";
+          });
+        });
+      })();
+    </script>
+
+  </div>
 </x-front-layout>

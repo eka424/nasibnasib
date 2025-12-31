@@ -3,35 +3,64 @@
     // ====== KEEP: existing data sources (routes/ids tetap sama) ======
     $todayLabel = \Carbon\Carbon::now('Asia/Makassar')->locale('id')->translatedFormat('l, d F Y');
 
+    // ====== ICONS: Outline / Sketch-like (inline SVG, no CDN) ======
+    $svg = [
+        'mosque' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M6 20V10"/><path d="M18 20V10"/><path d="M8 10V6l4-3 4 3v4"/><path d="M10 20v-6h4v6"/></svg>',
+        'home' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>',
+        'calendar' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3M16 3v3"/><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>',
+        'book' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19a2 2 0 0 0 2 2h14"/><path d="M6 3h14v18H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>',
+        'heart' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>',
+        'menu' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+        'spark' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.2 4.2L17.4 7.4l-4.2 1.2L12 12l-1.2-3.4L6.6 7.4l4.2-1.2L12 2z"/><path d="M19 13l.6 2.1L22 16l-2.4.9L19 19l-.6-2.1L16 16l2.4-.9L19 13z"/></svg>',
+        'hand' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12V8a1 1 0 0 1 2 0v4"/><path d="M9 12V6a1 1 0 0 1 2 0v6"/><path d="M11 12V7a1 1 0 0 1 2 0v5"/><path d="M13 12V9a1 1 0 0 1 2 0v7a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4v-2a2 2 0 0 1 2-2h0"/></svg>',
+        'bolt' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>',
+        'search' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
+        'check' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+        'info' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-5"/><path d="M12 8h.01"/></svg>',
+        'report' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h10l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v4h4"/><path d="M8 13h8"/><path d="M8 17h6"/><path d="M8 9h4"/></svg>',
+        'card' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>',
+        'time' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+        'pin' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-4.4 7-10a7 7 0 0 0-14 0c0 5.6 7 10 7 10z"/><circle cx="12" cy="11" r="2"/></svg>',
+        'library' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M6 20V9"/><path d="M10 20V9"/><path d="M14 20V9"/><path d="M18 20V9"/><path d="M3 9l9-5 9 5"/></svg>',
+        'play' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5v14l11-7z"/></svg>',
+        'users' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+        'leaf' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3s-7 1-11 5-5 11-5 11 7-1 11-5 5-11 5-11z"/><path d="M10 14c2-2 6-4 6-4"/></svg>',
+        'quote' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 11H6V7h4v4zm8 0h-4V7h4v4z"/><path d="M6 13h4v4H6z"/><path d="M14 13h4v4h-4z"/></svg>',
+        'diamond' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 8-7 12L5 10l7-8z"/><path d="M5 10h14"/></svg>',
+        'x' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>',
+        'arrow_right' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12"/><path d="m13 6 6 6-6 6"/></svg>',
+    ];
+
+    // ====== Nav data (routes tetap sama) ======
     $bottomNav = [
-        ['id' => 'beranda', 'label' => 'Home', 'href' => route('home'), 'icon' => '🏠', 'type' => 'link'],
-        ['id' => 'kegiatan', 'label' => 'Kegiatan', 'href' => route('kegiatan.index'), 'icon' => '📅', 'type' => 'link'],
-        ['id' => 'artikel', 'label' => 'Artikel', 'href' => route('artikel.index'), 'icon' => '📚', 'type' => 'link'],
-        ['id' => 'donasi', 'label' => 'Donasi', 'href' => route('donasi.index'), 'icon' => '❤️', 'type' => 'link'],
+        ['id' => 'beranda', 'label' => 'Home', 'href' => route('home'), 'icon' => 'home', 'type' => 'link'],
+        ['id' => 'kegiatan', 'label' => 'Kegiatan', 'href' => route('kegiatan.index'), 'icon' => 'calendar', 'type' => 'link'],
+        ['id' => 'artikel', 'label' => 'Artikel', 'href' => route('artikel.index'), 'icon' => 'book', 'type' => 'link'],
+        ['id' => 'donasi', 'label' => 'Donasi', 'href' => route('donasi.index'), 'icon' => 'heart', 'type' => 'link'],
     ];
 
     $quickAmounts = [
-        ['label' => 'Rp 10.000', 'icon' => '✨'],
-        ['label' => 'Rp 25.000', 'icon' => '🤲'],
-        ['label' => 'Rp 50.000', 'icon' => '❤️'],
+        ['label' => 'Rp 10.000', 'icon' => 'spark'],
+        ['label' => 'Rp 25.000', 'icon' => 'hand'],
+        ['label' => 'Rp 50.000', 'icon' => 'heart'],
     ];
 
     $trustBadges = [
-        ['label' => 'Transparan', 'icon' => '🔎'],
-        ['label' => 'Terverifikasi', 'icon' => '✅'],
-        ['label' => 'Cepat', 'icon' => '⚡'],
+        ['label' => 'Transparan', 'icon' => 'search'],
+        ['label' => 'Terverifikasi', 'icon' => 'check'],
+        ['label' => 'Cepat', 'icon' => 'bolt'],
     ];
 
     $fasilitas = [
-        ['icon' => '📚', 'text' => 'Perpustakaan digital bacaan Islami anak.'],
-        ['icon' => '🧸', 'text' => 'Area bermain aman & mudah diawasi.'],
-        ['icon' => '🧑‍🏫', 'text' => 'Pendamping relawan untuk ketertiban anak.'],
+        ['icon' => 'library', 'text' => 'Perpustakaan digital bacaan Islami anak.'],
+        ['icon' => 'play', 'text' => 'Area bermain aman & mudah diawasi.'],
+        ['icon' => 'users', 'text' => 'Pendamping relawan untuk ketertiban anak.'],
     ];
 
     $kegiatanAnak = [
-        ['icon' => '📖', 'text' => 'Dongeng Islami & tahfidz akhir pekan.'],
-        ['icon' => '🗣️', 'text' => 'Kelas tahsin keluarga.'],
-        ['icon' => '🌿', 'text' => 'Workshop adab & akhlak anak.'],
+        ['icon' => 'book', 'text' => 'Dongeng Islami & tahfidz akhir pekan.'],
+        ['icon' => 'users', 'text' => 'Kelas tahsin keluarga.'],
+        ['icon' => 'leaf', 'text' => 'Workshop adab & akhlak anak.'],
     ];
 
     $reminders = [
@@ -75,9 +104,7 @@
 
     $featuredArtikel = $artikels->first();
     $otherArtikels   = $artikels->skip(1);
-    $heroKegiatans   = $kegiatans->take(2);
 
-    // ====== NEW: Mosque image slot + Jadwal Sholat ======
     $masjidImage = $masjidImage ?? 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=2000&q=80';
 
     $fallbackSholat = [
@@ -99,653 +126,576 @@
         }
     }
 
-// next prayer highlight (WITA)
-$tz = 'Asia/Makassar';
-$now = \Carbon\Carbon::now($tz);
-$nextPrayerName = null;
-
-try {
-    $today = \Carbon\Carbon::today($tz);
-    $candidates = collect($prayerTimes)
-        ->map(function ($p) use ($today) {
-            $time = data_get($p, 'time', '');
-            $dt = null;
-
-            if (preg_match('/^\d{2}:\d{2}$/', $time)) {
-                $dt = $today->copy()->setTimeFromTimeString($time);
-            }
-
-            return [
-                'name' => data_get($p, 'name', ''),
-                'time' => $time,
-                'dt'   => $dt,
-            ];
-        })
-        ->filter(fn ($x) => $x['dt'] instanceof \Carbon\Carbon)
-        ->sortBy('dt')
-        ->values();
-
-    $next = $candidates->first(fn ($x) => $x['dt']->greaterThan($now));
-    if (!$next) $next = $candidates->first();
-
-    $nextPrayerName = $next['name'] ?? null;
-} catch (\Throwable $e) {
+    $tz = 'Asia/Makassar';
+    $now = \Carbon\Carbon::now($tz);
     $nextPrayerName = null;
-}
 
+    try {
+        $today = \Carbon\Carbon::today($tz);
+        $candidates = collect($prayerTimes)
+            ->map(function ($p) use ($today) {
+                $time = data_get($p, 'time', '');
+                $dt = null;
+
+                if (preg_match('/^\d{2}:\d{2}$/', $time)) {
+                    $dt = $today->copy()->setTimeFromTimeString($time);
+                }
+
+                return [
+                    'name' => data_get($p, 'name', ''),
+                    'time' => $time,
+                    'dt'   => $dt,
+                ];
+            })
+            ->filter(fn ($x) => $x['dt'] instanceof \Carbon\Carbon)
+            ->sortBy('dt')
+            ->values();
+
+        $next = $candidates->first(fn ($x) => $x['dt']->greaterThan($now));
+        if (!$next) $next = $candidates->first();
+
+        $nextPrayerName = $next['name'] ?? null;
+    } catch (\Throwable $e) {
+        $nextPrayerName = null;
+    }
 @endphp
 
-<div class="min-h-screen scroll-smooth overflow-x-hidden bg-[#70978C] text-[#1E4D40] pb-[calc(88px+env(safe-area-inset-bottom))]">
+{{-- IMPORTANT: Background must match front-layout (solid #13392f) --}}
+<div class="min-h-screen w-full overflow-x-hidden bg-[#13392f] text-white pb-[calc(92px+env(safe-area-inset-bottom))]">
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Amiri:wght@400;700&display=swap');
+
+    :root{
+      --bg:#13392f;
+      --gold:#E7B14B;
+      --card: rgba(255,255,255,0.07);
+      --card2: rgba(255,255,255,0.10);
+      --border: rgba(255,255,255,0.14);
+    }
+
     body { font-family: Inter, ui-sans-serif, system-ui, -apple-system; }
     h1,h2,h3,.heading { font-family: Poppins, ui-sans-serif, system-ui, -apple-system; }
     .arabic{font-family:'Amiri','Scheherazade New',serif;}
     .scrollbar-none{-ms-overflow-style:none; scrollbar-width:none;}
     .scrollbar-none::-webkit-scrollbar{display:none;}
     section[id]{ scroll-margin-top: 96px; }
+
+    .shell{max-width:1200px;}
+
+    /* Glass card that matches solid bg */
+    .glass{
+      background: var(--card);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 18px 60px -42px rgba(0,0,0,.65);
+    }
+    .glass-strong{
+      background: var(--card2);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .btn{ transition: transform .15s ease, filter .15s ease, box-shadow .15s ease; }
+    .btn:active{ transform: scale(.98); }
+    .btn:hover{ transform: translateY(-1px); }
+
     .line-clamp-1{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden;}
     .line-clamp-2{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;}
     .line-clamp-3{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;}
-    .home-shell{max-width:1152px;}
-    .snap-scroll{scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; touch-action:pan-x; overscroll-behavior-x:contain;}
-    .snap-item{scroll-snap-align:start;}
 
-    /* Bottom nav active state (palette baru) */
-    .bottom-item[data-active="true"]{
-      background: rgba(235,176,77,0.95);
-      color: #1E4D40;
-      box-shadow: 0 10px 30px -18px rgba(30,77,64,0.55);
+    svg{ stroke: currentColor; }
+    svg *{ vector-effect: non-scaling-stroke; }
+
+    .prayer-card{ transition: transform .15s ease, background .15s ease, border-color .15s ease; }
+    .prayer-card:hover{ transform: translateY(-1px); }
+    .prayer-card.is-active{
+      background: rgba(231,177,75,0.96) !important;
+      border-color: rgba(255,255,255,0.35) !important;
     }
-    .bottom-item[data-active="false"]{ background: transparent; color: rgba(255,255,255,0.92); }
+    .prayer-card.is-active .prayer-name,
+    .prayer-card.is-active .prayer-time{
+      color: #13392f !important;
+    }
+
+    .bottom-item[data-active="true"]{
+      background: rgba(231,177,75,0.96);
+      color: #13392f;
+      box-shadow: 0 18px 60px -40px rgba(231,177,75,0.70);
+    }
+    .bottom-item[data-active="false"]{
+      background: transparent;
+      color: rgba(255,255,255,0.88);
+    }
   </style>
 
-  {{-- HERO (struktur baru + jadwal sholat + slot gambar masjid) --}}
-  <section id="beranda" class="relative overflow-hidden pt-24">
-    <div aria-hidden class="absolute inset-0 -z-20">
-      <div class="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(255,255,255,0.35),transparent_55%)]"></div>
-      <div class="absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,rgba(235,176,77,0.25),transparent_55%)]"></div>
-      <div class="absolute inset-0 bg-[radial-gradient(circle_at_55%_85%,rgba(30,77,64,0.25),transparent_60%)]"></div>
-    </div>
+  {{-- NO BACKDROP GRADIENT: keep clean solid background --}}
+  {{-- (intentionally removed radial/linear gradients) --}}
 
-    <div class="relative mx-auto home-shell max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
-      <div class="flex justify-end lg:hidden mb-3">
-        <button data-open-drawer
-          class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/50 bg-white/20 text-white shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:shadow-lg"
-          aria-label="Buka menu" type="button">☰</button>
-      </div>
+  {{-- HERO --}}
+  <section id="beranda" class="relative min-h-[100svh] pt-24">
+    <div class="mx-auto shell max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
+      <div class="grid gap-6 lg:grid-cols-12 lg:items-stretch opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
 
-      <div class="grid gap-8 lg:grid-cols-12 lg:items-start opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
-        {{-- Left: Headline + CTA --}}
         <div class="lg:col-span-7">
-          <div class="rounded-[28px] border border-white/40 bg-white/20 p-6 shadow-[0_24px_60px_-40px_rgba(30,77,64,0.55)] backdrop-blur sm:p-8">
-            <div class="inline-flex items-center gap-2 rounded-full bg-[#EBB04D]/95 px-4 py-2 text-xs font-semibold text-[#1E4D40] ring-1 ring-white/60">
-              <span aria-hidden>✨</span> Ruang Digital Jamaah Masjid
+          <div class="glass rounded-[28px] p-6 sm:p-8">
+            <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white ring-1 ring-white/15">
+              <span class="inline-flex text-white/90">{!! $svg['spark'] !!}</span>
+              Pantau kegiatan • Artikel • Donasi
             </div>
 
-            <h1 class="heading mt-4 text-4xl font-extrabold leading-tight text-[#1E4D40] sm:text-5xl">
+            <h1 class="heading mt-4 text-4xl font-extrabold leading-tight text-white sm:text-5xl">
               Masjid Agung Al-A&#39;la
             </h1>
 
-            <p class="mt-3 max-w-2xl text-sm text-[#1E4D40]/85 sm:text-base">
-              Pantau kegiatan, baca artikel islami, dan berdonasi dengan aman — nyaman dipakai di HP.
-            </p>
+            <p class="mt-3 max-w-2xl text-sm text-white/75 sm:text-base text-justify leading-relaxed">
+  Masjid Agung Al-A'la merupakan pusat peribadatan umat Muslim sekaligus simbol toleransi beragama yang terletak di jantung Kota Gianyar, Bali. Sebagai masjid terbesar di kabupaten tersebut, bangunannya berdiri megah dengan arsitektur modern yang dipadukan dengan menara tinggi yang menjulang, menjadikannya salah satu landmark religi yang ikonik di kawasan tersebut.
 
-            <div class="mt-6 grid grid-cols-2 gap-3 lg:hidden">
+  <br><br>
+
+  Secara fungsional, masjid ini tidak hanya menjadi tempat ibadah salat fardu dan salat Jumat, tetapi juga berperan sebagai pusat aktivitas sosial dan pendidikan Islam bagi masyarakat sekitar. Letaknya yang strategis di pusat kota mencerminkan keharmonisan hidup berdampingan antara komunitas Muslim dengan masyarakat Gianyar yang mayoritas beragama Hindu. Keberadaan Masjid Agung Al-A'la menjadi bukti nyata dari semangat moderasi beragama dan kerukunan yang terjaga erat di Pulau Dewata.
+</p>
+
+            <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
               <a href="{{ route('kegiatan.index') }}"
-                class="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-[#1E4D40] shadow-lg transition active:scale-[0.98]">
-                Jadwal
+                class="btn inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#13392f] shadow">
+                Jelajahi Kegiatan
+                <span class="inline-flex">{!! $svg['arrow_right'] !!}</span>
+              </a>
+              <a href="{{ route('artikel.index') }}"
+                class="btn inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white">
+                <span class="inline-flex">{!! $svg['book'] !!}</span>
+                Baca Artikel
               </a>
               <a href="{{ route('donasi.index') }}"
-                class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1E4D40] px-4 py-3 text-sm font-semibold text-white shadow-lg transition active:scale-[0.98]">
-                Donasi
+                class="btn inline-flex items-center justify-center gap-2 rounded-full bg-[var(--gold)] px-6 py-3 text-sm font-semibold text-[#13392f] shadow">
+                <span class="inline-flex">{!! $svg['heart'] !!}</span>
+                Mulai Donasi
               </a>
             </div>
 
-            <div class="mt-6 hidden flex-col gap-3 sm:flex-row sm:items-center sm:justify-center lg:flex lg:justify-start">
-              <a href="{{ route('kegiatan.index') }}"
-                class="inline-flex items-center justify-center gap-2 rounded-full bg-[#1E4D40] px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:brightness-110">
-                Jelajahi Kegiatan →
-              </a>
-              <a href="{{ route('artikel.index') }}"
-                class="inline-flex items-center justify-center gap-2 rounded-full border border-white/70 bg-white/20 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-white/30">
-                Baca Artikel ↗
-              </a>
-              <a href="{{ route('donasi.index') }}"
-                class="inline-flex items-center justify-center gap-2 rounded-full bg-[#EBB04D] px-6 py-3 text-sm font-semibold text-[#1E4D40] shadow-lg transition hover:-translate-y-0.5 hover:brightness-110">
-                Mulai Donasi ❤
-              </a>
+            <div class="mt-7 grid gap-3 sm:grid-cols-2">
+              <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">Hari ini</p>
+                <p class="mt-1 text-sm font-semibold text-white">{{ $todayLabel }}</p>
+                <p class="mt-1 text-xs text-white/65">Gianyar, Bali • WITA</p>
+              </div>
+
+              <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">Kepercayaan</p>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  @foreach($trustBadges as $b)
+                    <span class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold text-white/90">
+                      <span class="inline-flex text-white/90">{!! $svg[$b['icon']] !!}</span>
+                      {{ $b['label'] }}
+                    </span>
+                  @endforeach
+                </div>
+              </div>
             </div>
 
             <div class="mt-6 flex flex-wrap gap-2">
-              @foreach($trustBadges as $b)
-                <span class="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/15 px-3 py-1 text-xs font-semibold text-white">
-                  <span aria-hidden>{{ $b['icon'] }}</span> {{ $b['label'] }}
-                </span>
-              @endforeach
+              <a href="#kegiatan" class="btn inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-white/90">
+                <span class="inline-flex">{!! $svg['calendar'] !!}</span>
+                Lihat highlight kegiatan
+              </a>
+              <a href="#donasi" class="btn inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-white/90">
+                <span class="inline-flex">{!! $svg['heart'] !!}</span>
+                Program donasi aktif
+              </a>
             </div>
           </div>
         </div>
 
-{{-- Right: Mosque image + Jadwal Sholat --}}
-<div class="lg:col-span-5">
-  <div class="overflow-hidden rounded-[28px] border border-white/45 bg-white/20 shadow-[0_24px_60px_-40px_rgba(30,77,64,0.55)] backdrop-blur">
-    {{-- SLOT GAMBAR MASJID --}}
-    <div class="relative aspect-[16/10] w-full bg-white/10">
-      <img
-        src="{{ $masjidImage }}"
-        alt="Gambar Masjid"
-        loading="lazy"
-        referrerpolicy="no-referrer"
-        class="h-full w-full object-cover"
-        onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=2000&q=80';"
-      />
-      <div class="absolute inset-0 bg-gradient-to-t from-[#1E4D40]/55 via-transparent to-transparent"></div>
+        <div class="lg:col-span-5">
+          <div class="glass rounded-[28px] overflow-hidden">
+            <div class="relative aspect-[16/10] w-full bg-white/5">
+              <img
+                src="{{ asset('images/fotomasjid.jpg') }}"
+                alt="Gambar Masjid"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                class="h-full w-full object-cover"
+                onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=2000&q=80';"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent"></div>
+              <div class="absolute left-4 top-4">
+                <span class="inline-flex items-center gap-2 rounded-full bg-black/35 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/15 backdrop-blur">
+                  <span class="inline-flex">{!! $svg['mosque'] !!}</span>
+                  Masjid Al Ala Gianyar
+                </span>
+              </div>
+            </div>
 
-      <div class="absolute left-4 top-4">
-        <span class="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/40 backdrop-blur">
-          🕌 Foto Masjid (bisa diganti)
-        </span>
-      </div>
-    </div>
+            <div class="p-5 sm:p-6">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">Jadwal Sholat</p>
+                  <p class="mt-1 text-sm font-semibold text-white/95">{{ $todayLabel }}</p>
+                  <p class="mt-0.5 text-xs text-white/65">Gianyar, Bali</p>
 
-    {{-- JADWAL SHOLAT --}}
-    <div class="p-5 sm:p-6">
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/90">Jadwal Sholat</p>
-          <p class="mt-1 text-sm font-semibold text-white/95">{{ $todayLabel }}</p>
-          <p class="mt-0.5 text-xs text-white/85">Gianyar, Bali</p>
+                  <p class="mt-2 text-xs text-white/70 leading-tight">
+                    Waktu sekarang: <span id="realtimeClock" class="font-semibold text-white">--:--:--</span> WITA
+                  </p>
+                  <p class="mt-0.5 text-xs text-white/70 leading-tight">
+                    Hitung mundur: <span id="nextCountdown" class="font-semibold text-white">--:--:--</span>
+                  </p>
+                </div>
 
-          {{-- realtime + countdown --}}
-          <p class="mt-0.5 text-xs text-white/85 leading-tight">
-            Waktu sekarang: <span id="realtimeClock" class="font-semibold">--:--:--</span> WITA
-          </p>
-          <p class="mt-0.5 text-xs text-white/85 leading-tight">
-            Hitung mundur: <span id="nextCountdown" class="font-semibold">--:--:--</span>
-          </p>
+                <span id="nextPrayerBadge" class="inline-flex items-center rounded-full bg-[var(--gold)] px-3 py-1 text-xs font-semibold text-[#13392f]">
+                  Next: {{ $nextPrayerName ?? 'Hari ini' }}
+                </span>
+              </div>
+
+              <div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                @foreach($prayerTimes as $p)
+                  @php
+                    $nm = (string) data_get($p,'name','');
+                    $tm = (string) data_get($p,'time','--:--');
+                    $isNext = $nextPrayerName && ($nm === $nextPrayerName);
+                  @endphp
+
+                  <div
+                    class="prayer-card rounded-2xl border border-white/15 {{ $isNext ? 'is-active' : 'bg-white/5' }} px-4 py-3"
+                    data-prayer="{{ $nm }}"
+                    data-time="{{ $tm }}"
+                  >
+                    <p class="prayer-name text-xs font-semibold {{ $isNext ? 'text-[#13392f]' : 'text-white/70' }}">
+                      {{ $nm }}
+                    </p>
+                    <p class="prayer-time heading mt-0.5 text-lg font-extrabold {{ $isNext ? 'text-[#13392f]' : 'text-white' }}">
+                      {{ $tm }}
+                    </p>
+                  </div>
+                @endforeach
+              </div>
+
+              <div class="mt-4 grid grid-cols-2 gap-2">
+                <a href="{{ route('kegiatan.index') }}"
+                  class="btn inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-[#13392f] shadow">
+                  <span class="inline-flex">{!! $svg['calendar'] !!}</span>
+                  Lihat Agenda
+                </a>
+                <a href="{{ route('donasi.index') }}"
+                  class="btn inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-white shadow ring-1 ring-white/15">
+                  <span class="inline-flex">{!! $svg['heart'] !!}</span>
+                  Donasi Sekarang
+                </a>
+              </div>
+
+              <p class="mt-3 text-[11px] text-white/60">
+              
+              </p>
+            </div>
+          </div>
         </div>
 
-        {{-- badge next (dibikin bisa diubah JS) --}}
-        <span id="nextPrayerBadge" class="inline-flex items-center rounded-full bg-[#EBB04D] px-3 py-1 text-xs font-semibold text-[#1E4D40]">
-          Next: {{ $nextPrayerName ?? 'Hari ini' }}
-        </span>
       </div>
-
-      <div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
-        @foreach($prayerTimes as $p)
-          @php
-            $nm = (string) data_get($p,'name','');
-            $tm = (string) data_get($p,'time','--:--');
-            $isNext = $nextPrayerName && ($nm === $nextPrayerName);
-          @endphp
-
-          <div
-            class="prayer-card rounded-2xl border border-white/50 {{ $isNext ? 'bg-[#EBB04D]' : 'bg-white/15' }} px-4 py-3"
-            data-prayer="{{ $nm }}"
-            data-time="{{ $tm }}"
-          >
-            <p class="prayer-name text-xs font-semibold {{ $isNext ? 'text-[#1E4D40]' : 'text-white/85' }}">
-              {{ $nm }}
-            </p>
-            <p class="prayer-time heading mt-0.5 text-lg font-extrabold {{ $isNext ? 'text-[#1E4D40]' : 'text-white' }}">
-              {{ $tm }}
-            </p>
-          </div>
-        @endforeach
-      </div>
-
-      <div class="mt-4 grid grid-cols-2 gap-2">
-        <a href="{{ route('kegiatan.index') }}"
-          class="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-[#1E4D40] shadow-sm transition hover:-translate-y-0.5">
-          Lihat Agenda
-        </a>
-        <a href="{{ route('donasi.index') }}"
-          class="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/70 bg-[#1E4D40] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:brightness-110">
-          Donasi Sekarang
-        </a>
-      </div>
-
-      <p class="mt-3 text-[11px] text-white/80">
-        *Data jadwal sholat bisa kamu inject dari controller lewat <span class="font-semibold">$jadwalSholat</span>.
-      </p>
     </div>
-  </div>
-</div>
-
-{{-- HERO GRID DITUTUP BIAR SECTION SETELAHNYA NGGAK KETELEN --}}
-</div>  {{-- end .grid --}}
-</div>  {{-- end .home-shell wrapper --}}
-</section>
+  </section>
 
   {{-- STATS --}}
   <section id="stats" class="relative py-10 sm:py-14">
-    <div class="mx-auto home-shell max-w-7xl px-4 sm:px-6 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
-      <div class="rounded-[28px] border border-white/45 bg-white/25 p-5 shadow-[0_24px_60px_-40px_rgba(30,77,64,0.55)] backdrop-blur sm:p-8">
-        <div class="mb-4">
-          <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/90">Ringkasan</p>
-          <h2 class="heading mt-2 text-2xl font-extrabold text-white">Statistik Masjid</h2>
-          <p class="mt-1 text-sm text-white/85">Singkat, rapi, dan enak discroll.</p>
+    <div class="mx-auto shell max-w-7xl px-4 sm:px-6 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
+      <div class="glass rounded-[28px] p-6 sm:p-8">
+        <div class="mb-4 flex items-end justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">Ringkasan</p>
+            <h2 class="heading mt-2 text-2xl font-extrabold text-white">Statistik Masjid</h2>
+            <p class="mt-1 text-sm text-white/70">Singkat, rapi, dan nyaman.</p>
+          </div>
         </div>
 
-        <div class="flex snap-scroll snap-x snap-mandatory gap-3 overflow-x-auto pb-2 scrollbar-none sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible lg:grid-cols-4">
+        <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-none sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible lg:grid-cols-4">
           @forelse($stats as $s)
-            <div class="w-[70%] flex-none snap-item snap-start rounded-2xl border border-white/50 bg-white px-5 py-5 text-[#1E4D40] shadow-sm transition hover:-translate-y-1 sm:w-auto sm:flex-auto">
+            <div class="w-[72%] flex-none rounded-2xl border border-white/15 bg-white/5 px-5 py-5 text-white shadow-sm transition hover:-translate-y-1 sm:w-auto sm:flex-auto">
               <div class="flex items-center gap-4">
-                <div class="grid h-12 w-12 place-content-center rounded-2xl bg-[#70978C]/15 text-2xl text-[#1E4D40] ring-1 ring-[#1E4D40]/10">
+                <div class="grid h-12 w-12 place-content-center rounded-2xl bg-white/10 text-2xl ring-1 ring-white/10">
                   {{ $s['icon'] }}
                 </div>
                 <div>
-                  <p class="heading text-3xl font-extrabold text-[#1E4D40]">{{ $s['value'] }}</p>
-                  <p class="text-sm text-[#1E4D40]/75">{{ $s['label'] }}</p>
+                  <p class="heading text-3xl font-extrabold text-white">{{ $s['value'] }}</p>
+                  <p class="text-sm text-white/70">{{ $s['label'] }}</p>
                 </div>
               </div>
             </div>
           @empty
-            <p class="text-sm text-white/85">Statistik belum tersedia.</p>
+            <p class="text-sm text-white/70">Statistik belum tersedia.</p>
           @endforelse
         </div>
 
-        <p class="mt-2 text-xs text-white/80 sm:hidden">Geser untuk melihat statistik lain →</p>
+        <p class="mt-2 text-xs text-white/60 sm:hidden">Geser untuk melihat statistik lain →</p>
       </div>
     </div>
   </section>
 
   {{-- KEGIATAN --}}
   <section id="kegiatan" class="py-12 sm:py-16">
-    <div class="mx-auto home-shell max-w-7xl px-4 sm:px-6 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
+    <div class="mx-auto shell max-w-7xl px-4 sm:px-6 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
       <div class="mb-5 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/90">Highlight</p>
+          <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">Highlight</p>
           <h2 class="heading mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">Kegiatan Terdekat</h2>
-          <p class="mt-1 text-sm text-white/85">Swipe card di HP biar cepat.</p>
+          <p class="mt-1 text-sm text-white/70">Swipe kartu untuk cepat.</p>
         </div>
-        <a href="{{ route('kegiatan.index') }}" class="text-sm font-semibold text-white underline decoration-white/60 underline-offset-4 hover:decoration-white">
+        <a href="{{ route('kegiatan.index') }}" class="text-sm font-semibold text-white/90 underline decoration-white/30 underline-offset-4 hover:decoration-white">
           Semua Kegiatan →
         </a>
       </div>
 
-      <div class="flex snap-scroll snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scrollbar-none md:grid md:grid-cols-2 md:overflow-visible lg:grid-cols-3" style="WebkitOverflowScrolling:touch;">
+      <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-none md:grid md:grid-cols-2 md:overflow-visible lg:grid-cols-3">
         @forelse($kegiatans as $kegiatan)
-          <article class="w-[86%] max-w-sm flex-none snap-item snap-start overflow-hidden rounded-[28px] border border-white/50 bg-white text-[#1E4D40] shadow-md transition hover:-translate-y-1 md:w-auto md:max-w-none md:flex-auto">
-            <div class="relative aspect-[16/10] w-full bg-[#70978C]/10">
+          <article class="w-[86%] max-w-sm flex-none overflow-hidden rounded-[28px] border border-white/15 bg-white/5 text-white shadow-md transition hover:-translate-y-1 md:w-auto md:max-w-none md:flex-auto">
+            <div class="relative aspect-[16/10] w-full bg-white/5">
               <img loading="lazy"
                 src="{{ $kegiatan->poster ?: 'https://images.unsplash.com/photo-1526772662000-3f88f10405ff?auto=format&fit=crop&w=1400&q=80' }}"
                 alt="{{ $kegiatan->nama_kegiatan }}"
                 class="h-full w-full object-cover"
                 referrerpolicy="no-referrer" />
-              <div class="absolute inset-0 bg-gradient-to-t from-[#1E4D40]/35 via-transparent to-transparent"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent"></div>
             </div>
 
             <div class="space-y-3 p-5">
               <div class="flex flex-wrap items-center gap-2 text-xs">
-                <span class="rounded-full bg-[#70978C]/15 px-3 py-1 font-semibold text-[#1E4D40] ring-1 ring-[#1E4D40]/10">
+                <span class="rounded-full bg-white/10 px-3 py-1 font-semibold text-white ring-1 ring-white/10">
                   {{ $kegiatan->kategori ?? 'Program Masjid' }}
                 </span>
-                <span class="rounded-full bg-[#1E4D40]/5 px-3 py-1 font-semibold text-[#1E4D40]/75">
-                  🗓 {{ optional($kegiatan->tanggal_mulai)->translatedFormat('d M Y') ?? 'Jadwal menyusul' }}
+                <span class="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 font-semibold text-white/70 ring-1 ring-white/10">
+                  <span class="inline-flex">{!! $svg['calendar'] !!}</span>
+                  {{ optional($kegiatan->tanggal_mulai)->translatedFormat('d M Y') ?? 'Jadwal menyusul' }}
                 </span>
-                <span class="rounded-full bg-[#1E4D40]/5 px-3 py-1 font-semibold text-[#1E4D40]/75">
-                   {{ $kegiatan->lokasi ?? 'Lokasi menyusul' }}
+                <span class="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 font-semibold text-white/70 ring-1 ring-white/10">
+                  <span class="inline-flex">{!! $svg['pin'] !!}</span>
+                  {{ $kegiatan->lokasi ?? 'Lokasi menyusul' }}
                 </span>
               </div>
 
-              <h3 class="heading text-lg font-semibold text-[#1E4D40] line-clamp-2">{{ $kegiatan->nama_kegiatan }}</h3>
-              <p class="text-sm leading-relaxed text-[#1E4D40]/75 line-clamp-3">
+              <h3 class="heading text-lg font-semibold text-white line-clamp-2">{{ $kegiatan->nama_kegiatan }}</h3>
+              <p class="text-sm leading-relaxed text-white/70 line-clamp-3">
                 {{ \Illuminate\Support\Str::limit($kegiatan->deskripsi, 140) }}
               </p>
 
               <div class="grid grid-cols-2 gap-2 pt-1">
                 <a href="{{ route('kegiatan.show', $kegiatan) }}"
-                  class="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1E4D40] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:brightness-110">
+                  class="btn inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-[#13392f] shadow">
                   Daftar
                 </a>
                 <a href="{{ route('kegiatan.show', $kegiatan) }}"
-                  class="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#1E4D40]/15 bg-white px-4 py-2 text-sm font-semibold text-[#1E4D40] shadow-sm transition hover:bg-[#70978C]/10">
-                  ℹ️ Detail
+                  class="btn inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white">
+                  <span class="inline-flex">{!! $svg['info'] !!}</span>
+                  Detail
                 </a>
               </div>
             </div>
           </article>
         @empty
-          <p class="text-sm text-white/85">Belum ada kegiatan tersedia.</p>
+          <p class="text-sm text-white/70">Belum ada kegiatan tersedia.</p>
         @endforelse
       </div>
 
-      <p class="mt-2 text-xs text-white/85 md:hidden">Swipe kiri/kanan untuk lihat kegiatan lain →</p>
+      <p class="mt-2 text-xs text-white/60 md:hidden">Swipe kiri/kanan untuk lihat kegiatan lain →</p>
     </div>
   </section>
 
-  {{-- PROFIL --}}
-  <section id="profil" class="py-12 sm:py-16">
-    <div class="mx-auto grid home-shell max-w-7xl grid-cols-1 items-center gap-10 px-4 sm:px-6 md:grid-cols-2 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
-      <div class="space-y-5">
-        <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/90">Tentang Masjid</p>
-        <h2 class="heading text-2xl font-extrabold tracking-tight text-white sm:text-3xl">Visi & Misi</h2>
-        <p class="text-sm text-white/85">Masjid sebagai pusat ibadah, pendidikan, dan pemberdayaan jamaah.</p>
-
-        <div class="rounded-[28px] border border-white/50 bg-white p-6 text-[#1E4D40] shadow-md space-y-4">
-          <div>
-            <h3 class="text-sm font-semibold">Visi</h3>
-            <ul class="mt-2 list-disc space-y-1 pl-4 text-sm text-[#1E4D40]/75">
-              <li>Pusat peradaban Islam modern yang inklusif dan berkemajuan.</li>
-              <li>Menghadirkan jamaah berilmu dan berdaya saing.</li>
-            </ul>
-          </div>
-          <div>
-            <h3 class="text-sm font-semibold">Misi</h3>
-            <ul class="mt-2 list-disc space-y-1 pl-4 text-sm text-[#1E4D40]/75">
-              <li>Menyelenggarakan ibadah berjamaah yang khusyuk.</li>
-              <li>Mendorong pendidikan Islam sepanjang hayat.</li>
-              <li>Memperkuat program sosial dan ekonomi umat.</li>
-            </ul>
-          </div>
+ {{-- ARTIKEL --}}
+<section id="artikel" class="py-12 sm:py-16">
+  <div class="mx-auto shell max-w-7xl px-4 sm:px-6 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
+    <div class="glass rounded-[32px] p-6 sm:p-8">
+      <div class="mb-5 flex items-end justify-between gap-3">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">Artikel</p>
+          <h2 class="heading mt-2 text-2xl font-extrabold tracking-tight text-white">Artikel Terbaru</h2>
+          <p class="mt-1 text-sm text-white/70">Ringkas, mudah discan.</p>
         </div>
+        <a href="{{ route('artikel.index') }}" class="text-sm font-semibold text-white/90 underline decoration-white/30 underline-offset-4 hover:decoration-white">Semua</a>
       </div>
 
-      <div class="relative aspect-[4/3] w-full overflow-hidden rounded-[28px] border border-white/45 shadow-lg">
-        <img loading="lazy" src="{{ $masjidImage }}" alt="Interior masjid"
-          class="h-full w-full object-cover"
-          referrerpolicy="no-referrer"
-          onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=2000&q=80';" />
-        <div class="absolute inset-0 bg-gradient-to-t from-[#1E4D40]/55 via-transparent to-transparent"></div>
-      </div>
-    </div>
-  </section>
+      <div class="grid gap-4 lg:grid-cols-5">
+        @if($featuredArtikel)
+          @php
+            $thumb = $featuredArtikel->thumbnail ?? null;
+            $thumbUrl = $thumb
+              ? (\Illuminate\Support\Str::startsWith($thumb, ['http://','https://']) ? $thumb : asset($thumb))
+              : $masjidImage;
+          @endphp
 
-  {{-- PROGRAM KELUARGA --}}
-  <section id="program" class="py-12 sm:py-16">
-    <div class="mx-auto home-shell max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="relative overflow-hidden rounded-[32px] border border-white/45 bg-white/25 shadow-[0_24px_60px_-40px_rgba(30,77,64,0.55)] backdrop-blur opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
-        <div aria-hidden class="pointer-events-none absolute inset-0 -z-10">
-          <div class="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(255,255,255,0.35),transparent_55%)]"></div>
-          <div class="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_70%_30%,rgba(235,176,77,0.25),transparent_55%)]"></div>
-        </div>
-
-        <div class="grid gap-8 p-6 sm:p-8 lg:grid-cols-12 lg:items-stretch lg:gap-10 lg:p-10">
-          <div class="lg:col-span-6">
-            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-white/90">Program Keluarga</p>
-            <h2 class="heading mt-3 text-3xl font-extrabold leading-tight text-white sm:text-4xl">Masjid Ramah Anak</h2>
-            <p class="mt-3 max-w-xl text-sm text-white/85 sm:text-base">Layout rapi, mudah dibaca, dan tetap modern.</p>
-
-            <div class="mt-6 rounded-[28px] border border-white/50 bg-white p-6 text-[#1E4D40] shadow-xl">
-              <div class="grid gap-5 sm:grid-cols-2">
-                <div>
-                  <p class="heading text-base font-extrabold text-[#1E4D40]">Fasilitas</p>
-                  <ul class="mt-3 space-y-2">
-                    @foreach($fasilitas as $i)
-                      <li class="flex items-start gap-2 text-sm text-[#1E4D40]/80">
-                        <span class="mt-0.5 grid h-7 w-7 place-items-center rounded-xl bg-[#70978C]/15 ring-1 ring-[#1E4D40]/10" aria-hidden>{{ $i['icon'] }}</span>
-                        <span class="leading-relaxed">{{ $i['text'] }}</span>
-                      </li>
-                    @endforeach
-                  </ul>
-                </div>
-
-                <div>
-                  <p class="heading text-base font-extrabold text-[#1E4D40]">Kegiatan</p>
-                  <ul class="mt-3 space-y-2">
-                    @foreach($kegiatanAnak as $i)
-                      <li class="flex items-start gap-2 text-sm text-[#1E4D40]/80">
-                        <span class="mt-0.5 grid h-7 w-7 place-items-center rounded-xl bg-[#EBB04D]/25 ring-1 ring-[#1E4D40]/10" aria-hidden>{{ $i['icon'] }}</span>
-                        <span class="leading-relaxed">{{ $i['text'] }}</span>
-                      </li>
-                    @endforeach
-                  </ul>
-                </div>
-              </div>
-
-              <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <a href="{{ route('perpustakaan.index') }}"
-                  class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1E4D40] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:brightness-110">
-                  <span aria-hidden>🧾</span> Lihat Program
-                </a>
-                <a href="{{ route('kegiatan.index') }}"
-                  class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#EBB04D] px-5 py-3 text-sm font-semibold text-[#1E4D40] shadow-md transition hover:-translate-y-0.5 hover:brightness-110">
-                  <span aria-hidden>🗓️</span> Jadwal Anak
-                </a>
+          <a href="{{ route('artikel.show', $featuredArtikel) }}" class="group relative overflow-hidden rounded-[28px] border border-white/15 bg-white/5 text-white shadow-md lg:col-span-3">
+            <div class="relative h-56 w-full sm:h-60">
+              <img
+                src="{{ $thumbUrl }}"
+                alt="{{ $featuredArtikel->title }}"
+                class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.02]"
+                referrerpolicy="no-referrer"
+                onerror="this.onerror=null;this.src='{{ $masjidImage }}';"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+              <div class="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-[var(--gold)] px-3 py-1 text-xs font-semibold text-[#13392f]">
+                Featured
               </div>
             </div>
-          </div>
 
-          <div class="lg:col-span-6">
-            <div class="relative h-full overflow-hidden rounded-[28px] border border-white/45 bg-white/15 shadow-2xl">
-              <div class="relative h-full min-h-[420px]">
-                <img
-                  src="https://images.unsplash.com/photo-1526772662000-3f88f10405ff?auto=format&fit=crop&w=2000&q=80"
-                  alt="Program keluarga masjid"
-                  loading="lazy"
-                  referrerpolicy="no-referrer"
-                  onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=2000&q=80';"
-                  class="absolute inset-0 h-full w-full object-cover" />
-                <div class="absolute inset-0 bg-gradient-to-b from-[#1E4D40]/45 via-[#1E4D40]/10 to-[#1E4D40]/70"></div>
-
-                <div class="absolute left-6 top-6 flex flex-wrap items-center gap-2">
-                  <span class="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/40 backdrop-blur">
-                    <span class="h-2 w-2 rounded-full bg-[#EBB04D]"></span>
-                    Program keluarga
-                  </span>
-                  <span class="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/40 backdrop-blur">
-                    <span aria-hidden></span> Ramah anak
-                  </span>
-                </div>
-
-                <div class="absolute bottom-6 left-6 right-6">
-                  <div class="rounded-[28px] bg-white p-5 text-[#1E4D40] shadow-xl">
-                    <p class="text-xs font-semibold uppercase tracking-[0.25em] text-[#1E4D40]/60">Highlight</p>
-                    <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <p class="heading text-xl font-extrabold">Akhir Pekan Ceria</p>
-                        <p class="mt-1 text-sm text-[#1E4D40]/75">Dongeng Islami • Tahfidz • Games edukatif</p>
-                      </div>
-                      <div class="flex flex-wrap gap-2">
-                        <span class="inline-flex items-center gap-2 rounded-full bg-[#70978C]/15 px-3 py-1 text-xs font-semibold text-[#1E4D40]"><span aria-hidden>⏱️</span> Sabtu–Ahad</span>
-                        <span class="inline-flex items-center gap-2 rounded-full bg-[#1E4D40]/5 px-3 py-1 text-xs font-semibold text-[#1E4D40]"><span aria-hidden>📍</span> Aula</span>
-                        <span class="inline-flex items-center gap-2 rounded-full bg-[#1E4D40]/5 px-3 py-1 text-xs font-semibold text-[#1E4D40]"><span aria-hidden>🕗</span> 08:00</span>
-                      </div>
-                    </div>
-
-                    <div class="mt-4 flex flex-col gap-2 sm:flex-row">
-                      <a href="{{ route('kegiatan.index') }}"
-                        class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#1E4D40] px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:brightness-110">
-                        <span aria-hidden></span> Daftar Anak
-                      </a>
-                      <a href="{{ route('kegiatan.index') }}"
-                        class="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-[#1E4D40]/15 bg-white px-4 py-3 text-sm font-semibold text-[#1E4D40] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#70978C]/10">
-                        <span aria-hidden>ℹ</span> Detail
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
+            <div class="space-y-2 p-5">
+              <p class="text-xs text-white/65">
+                {{ $artikelDate($featuredArtikel) }} • {{ $readingTime($featuredArtikel) }} menit baca
+              </p>
+              <h3 class="heading text-xl font-extrabold line-clamp-2">{{ $featuredArtikel->title }}</h3>
+              <p class="text-sm text-white/70 line-clamp-3">
+                {{ \Illuminate\Support\Str::limit(strip_tags($featuredArtikel->content ?? ''), 160) }}
+              </p>
+              <div class="pt-1">
+                <span class="inline-flex items-center gap-2 text-sm font-semibold text-white">
+                  Baca selengkapnya <span aria-hidden>→</span>
+                </span>
               </div>
             </div>
-          </div>
+          </a>
+        @endif
 
-        </div>
-      </div>
-    </div>
-  </section>
+        <div class="grid gap-3 lg:col-span-2">
+          @forelse($otherArtikels->take(4) as $a)
+            @php
+              $thumb = $a->thumbnail ?? null;
+              $thumbUrl = $thumb
+                ? (\Illuminate\Support\Str::startsWith($thumb, ['http://','https://']) ? $thumb : asset($thumb))
+                : $masjidImage;
+            @endphp
 
-  {{-- ARTIKEL + DONASI --}}
-  <section id="artikel" class="py-12 sm:py-16">
-    <div class="mx-auto home-shell max-w-7xl px-4 sm:px-6 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
-      <div class="rounded-[32px] border border-white/45 bg-white/25 p-6 shadow-[0_24px_60px_-40px_rgba(30,77,64,0.55)] backdrop-blur sm:p-8">
-        <div class="mb-5 flex items-end justify-between gap-3">
-          <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/90">Artikel</p>
-            <h2 class="heading mt-2 text-2xl font-extrabold tracking-tight text-white">Artikel Terbaru</h2>
-            <p class="mt-1 text-sm text-white/85">Ringkas, mudah discan, enak di HP.</p>
-          </div>
-          <a href="{{ route('artikel.index') }}" class="text-sm font-semibold text-white underline decoration-white/60 underline-offset-4 hover:decoration-white">Semua</a>
-        </div>
-
-        <div class="grid gap-4 lg:grid-cols-5">
-          @if($featuredArtikel)
-            <a href="{{ route('artikel.show', $featuredArtikel) }}" class="group relative overflow-hidden rounded-[28px] border border-white/45 bg-white text-[#1E4D40] shadow-md lg:col-span-3">
-              <div class="relative h-56 w-full sm:h-60">
+            <a href="{{ route('artikel.show', $a) }}" class="group flex gap-3 rounded-[24px] border border-white/15 bg-white/5 p-4 text-white shadow-sm transition hover:-translate-y-0.5">
+              <div class="h-16 w-20 flex-none overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/10">
                 <img
-                  src="{{ $featuredArtikel->thumbnail ?: $masjidImage }}"
-                  alt="{{ $featuredArtikel->title }}"
+                  src="{{ $thumbUrl }}"
+                  alt="{{ $a->title }}"
                   class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.02]"
-                  referrerpolicy="no-referrer" />
-                <div class="absolute inset-0 bg-gradient-to-t from-[#1E4D40]/70 via-[#1E4D40]/10 to-transparent"></div>
-                <div class="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-[#EBB04D] px-3 py-1 text-xs font-semibold text-[#1E4D40]">
-                  Featured
-                </div>
+                  referrerpolicy="no-referrer"
+                  onerror="this.onerror=null;this.src='{{ $masjidImage }}';"
+                />
               </div>
-
-              <div class="space-y-2 p-5">
-                <p class="text-xs text-[#1E4D40]/70">
-                  {{ $artikelDate($featuredArtikel) }} • {{ $readingTime($featuredArtikel) }} menit baca
-                </p>
-                <h3 class="heading text-xl font-extrabold line-clamp-2">{{ $featuredArtikel->title }}</h3>
-                <p class="text-sm text-[#1E4D40]/75 line-clamp-3">
-                  {{ \Illuminate\Support\Str::limit(strip_tags($featuredArtikel->content ?? ''), 160) }}
-                </p>
-                <div class="pt-1">
-                  <span class="inline-flex items-center gap-2 text-sm font-semibold text-[#1E4D40]">
-                    Baca selengkapnya <span aria-hidden>→</span>
-                  </span>
-                </div>
+              <div class="min-w-0">
+                <p class="text-[11px] text-white/60">{{ $artikelDate($a) }} • {{ $readingTime($a) }} mnt</p>
+                <p class="mt-1 text-sm font-semibold line-clamp-2">{{ $a->title }}</p>
               </div>
             </a>
-          @endif
-
-          <div class="grid gap-3 lg:col-span-2">
-            @forelse($otherArtikels->take(4) as $a)
-              <a href="{{ route('artikel.show', $a) }}" class="group flex gap-3 rounded-[24px] border border-white/45 bg-white p-4 text-[#1E4D40] shadow-sm transition hover:-translate-y-0.5">
-                <div class="h-16 w-20 flex-none overflow-hidden rounded-2xl bg-[#70978C]/15">
-                  <img
-                    src="{{ $a->thumbnail ?: $masjidImage }}"
-                    alt="{{ $a->title }}"
-                    class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.02]"
-                    referrerpolicy="no-referrer" />
-                </div>
-                <div class="min-w-0">
-                  <p class="text-[11px] text-[#1E4D40]/70">{{ $artikelDate($a) }} • {{ $readingTime($a) }} mnt</p>
-                  <p class="mt-1 text-sm font-semibold line-clamp-2">{{ $a->title }}</p>
-                </div>
-              </a>
-            @empty
-              <p class="text-sm text-white/85">Belum ada artikel.</p>
-            @endforelse
-          </div>
+          @empty
+            <p class="text-sm text-white/70">Belum ada artikel.</p>
+          @endforelse
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
+
 
   {{-- DONASI --}}
   <section id="donasi" class="py-12 sm:py-16">
-    <div class="mx-auto home-shell max-w-7xl px-4 sm:px-6 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
-      <div class="rounded-[32px] border border-white/45 bg-white/25 p-6 shadow-[0_24px_60px_-40px_rgba(30,77,64,0.55)] backdrop-blur sm:p-8">
+    <div class="mx-auto shell max-w-7xl px-4 sm:px-6 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
+      <div class="glass rounded-[32px] p-6 sm:p-8">
         <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/90">Donasi</p>
+            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">Donasi</p>
             <h2 class="heading mt-2 text-2xl font-extrabold tracking-tight text-white">Program Donasi</h2>
-            <p class="mt-1 text-sm text-white/85">Cepat pilih nominal, lanjut ke halaman donasi.</p>
+            <p class="mt-1 text-sm text-white/70">Pilih nominal cepat atau buka detail program.</p>
           </div>
-          <a href="{{ route('donasi.index') }}" class="text-sm font-semibold text-white underline decoration-white/60 underline-offset-4 hover:decoration-white">
+          <a href="{{ route('donasi.index') }}" class="text-sm font-semibold text-white/90 underline decoration-white/30 underline-offset-4 hover:decoration-white">
             Semua Donasi →
           </a>
         </div>
 
         <div class="grid gap-4 lg:grid-cols-3">
-          {{-- Quick Amount --}}
-          <div class="rounded-[28px] border border-white/45 bg-white p-5 text-[#1E4D40] shadow-sm">
+          <div class="rounded-[28px] border border-white/15 bg-white/5 p-5 text-white shadow-sm">
             <p class="heading text-lg font-extrabold">Cepat Donasi</p>
-            <p class="mt-1 text-sm text-[#1E4D40]/75">Pilih nominal, lalu lanjut.</p>
+            <p class="mt-1 text-sm text-white/70">Pilih nominal, lalu lanjut.</p>
 
             <div class="mt-4 grid grid-cols-3 gap-2">
               @foreach($quickAmounts as $qa)
                 <a href="{{ route('donasi.index') }}"
-                  class="flex items-center justify-center gap-2 rounded-2xl border border-[#1E4D40]/15 bg-white px-3 py-3 text-xs font-semibold text-[#1E4D40] transition hover:bg-[#70978C]/10">
-                  <span aria-hidden>{{ $qa['icon'] }}</span> {{ $qa['label'] }}
+                  class="btn flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-3 py-3 text-xs font-semibold text-white hover:bg-white/10">
+                  <span class="inline-flex text-white/90">{!! $svg[$qa['icon']] !!}</span>
+                  {{ $qa['label'] }}
                 </a>
               @endforeach
             </div>
 
             <a href="{{ route('donasi.index') }}"
-              class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#EBB04D] px-4 py-3 text-sm font-semibold text-[#1E4D40] shadow-sm transition hover:-translate-y-0.5 hover:brightness-110">
-              💳 Lanjut Donasi
+              class="btn mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--gold)] px-4 py-3 text-sm font-semibold text-[#13392f] shadow">
+              <span class="inline-flex">{!! $svg['card'] !!}</span>
+              Lanjut Donasi
             </a>
 
             <div class="mt-4 flex flex-wrap gap-2">
               @foreach($trustBadges as $b)
-                <span class="inline-flex items-center gap-2 rounded-full bg-[#70978C]/15 px-3 py-1 text-xs font-semibold text-[#1E4D40] ring-1 ring-[#1E4D40]/10">
-                  <span aria-hidden>{{ $b['icon'] }}</span> {{ $b['label'] }}
+                <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/10">
+                  <span class="inline-flex text-white/90">{!! $svg[$b['icon']] !!}</span>
+                  {{ $b['label'] }}
                 </span>
               @endforeach
             </div>
           </div>
 
-          {{-- Donasi cards --}}
           <div class="lg:col-span-2">
-            <div class="flex snap-scroll snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scrollbar-none md:grid md:grid-cols-2 md:overflow-visible">
+            <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-none md:grid md:grid-cols-2 md:overflow-visible">
               @forelse($donasis as $d)
                 @php
                   $target = (int) ($d->target ?? 0);
                   $terkumpul = (int) ($d->terkumpul ?? 0);
                   $progress = ($target > 0) ? min(100, ($terkumpul / $target) * 100) : 0;
                   $sisa = max(0, $target - $terkumpul);
-
                   $status = 'Aktif';
-                  $statusClasses = 'border-[#1E4D40]/15 bg-[#70978C]/15 text-[#1E4D40]';
-                  $dotClasses = 'bg-[#EBB04D]';
                 @endphp
 
-                <article class="w-[86%] flex-none snap-item snap-start rounded-[28px] border border-white/45 bg-white p-5 text-[#1E4D40] shadow-sm transition hover:-translate-y-0.5 md:w-auto">
+                <article class="w-[86%] flex-none rounded-[28px] border border-white/15 bg-white/5 p-5 text-white shadow-sm transition hover:-translate-y-0.5 md:w-auto">
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
-                      <p class="text-base font-semibold text-[#1E4D40]">
-                        <span class="mr-2" aria-hidden>💠</span>
+                      <p class="text-base font-semibold text-white inline-flex items-center gap-2">
+                        <span class="inline-flex text-white/90">{!! $svg['diamond'] !!}</span>
                         {{ $d->judul }}
                       </p>
-                      <p class="mt-1 text-xs text-[#1E4D40]/70">
-                        Target <span class="font-semibold text-[#1E4D40]">{{ $formatRupiah($target) }}</span>
-                        <span class="mx-2 text-[#1E4D40]/20">•</span>
-                        <span class="font-semibold text-[#1E4D40]">{{ number_format($progress, 0) }}%</span>
+                      <p class="mt-1 text-xs text-white/65">
+                        Target <span class="font-semibold text-white">{{ $formatRupiah($target) }}</span>
+                        <span class="mx-2 text-white/20">•</span>
+                        <span class="font-semibold text-white">{{ number_format($progress, 0) }}%</span>
                       </p>
                     </div>
 
-                    <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold {{ $statusClasses }}">
-                      <span class="h-1.5 w-1.5 rounded-full {{ $dotClasses }}"></span>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white">
+                      <span class="h-1.5 w-1.5 rounded-full bg-[var(--gold)]"></span>
                       {{ $status }}
                     </span>
                   </div>
 
                   <div class="mt-4">
-                    <div class="h-2 w-full rounded-full bg-[#1E4D40]/10">
-                      <div class="h-2 rounded-full bg-[#1E4D40] transition-[width] duration-700" style="width: {{ $progress }}%"></div>
+                    <div class="h-2 w-full rounded-full bg-white/10">
+                      <div class="h-2 rounded-full bg-white transition-[width] duration-700" style="width: {{ $progress }}%"></div>
                     </div>
 
-                    <div class="mt-3 grid grid-cols-2 gap-2 text-[11px] text-[#1E4D40]/75">
-                      <div class="rounded-2xl border border-[#1E4D40]/10 bg-[#70978C]/10 px-3 py-2">
-                        <p class="text-[#1E4D40]/65">Terkumpul</p>
-                        <p class="mt-0.5 text-xs font-semibold text-[#1E4D40]">{{ $formatRupiah($terkumpul) }}</p>
+                    <div class="mt-3 grid grid-cols-2 gap-2 text-[11px] text-white/70">
+                      <div class="rounded-2xl border border-white/15 bg-white/5 px-3 py-2">
+                        <p class="text-white/60">Terkumpul</p>
+                        <p class="mt-0.5 text-xs font-semibold text-white">{{ $formatRupiah($terkumpul) }}</p>
                       </div>
-                      <div class="rounded-2xl border border-[#1E4D40]/10 bg-[#70978C]/10 px-3 py-2">
-                        <p class="text-[#1E4D40]/65">Sisa</p>
-                        <p class="mt-0.5 text-xs font-semibold text-[#1E4D40]">{{ $formatRupiah($sisa) }}</p>
+                      <div class="rounded-2xl border border-white/15 bg-white/5 px-3 py-2">
+                        <p class="text-white/60">Sisa</p>
+                        <p class="mt-0.5 text-xs font-semibold text-white">{{ $formatRupiah($sisa) }}</p>
                       </div>
                     </div>
 
                     <div class="mt-4 grid grid-cols-2 gap-2">
-                      {{-- keep route target same --}}
                       <a href="{{ route('donasi.show', $d) }}"
-                        class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1E4D40] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:brightness-110">
-                        <span aria-hidden>💳</span> Donasi
+                        class="btn inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-[#13392f] shadow">
+                        <span class="inline-flex">{!! $svg['card'] !!}</span>
+                        Donasi
                       </a>
                       <a href="{{ route('donasi.show', $d) }}"
-                        class="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#1E4D40]/15 bg-white px-4 py-2 text-sm font-semibold text-[#1E4D40] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#70978C]/10">
-                        <span aria-hidden>📈</span> Laporan
+                        class="btn inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white">
+                        <span class="inline-flex">{!! $svg['report'] !!}</span>
+                        Laporan
                       </a>
                     </div>
                   </div>
                 </article>
               @empty
-                <p class="text-sm text-white/85">Belum ada program donasi aktif.</p>
+                <p class="text-sm text-white/70">Belum ada program donasi aktif.</p>
               @endforelse
             </div>
           </div>
@@ -755,54 +705,55 @@ try {
     </div>
   </section>
 
-  {{-- PENGINGAT HARIAN (Carousel) --}}
+  {{-- PENGINGAT --}}
   <section class="relative py-12 sm:py-14">
-    <div class="mx-auto home-shell max-w-7xl px-4 sm:px-6 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
-      <div class="relative overflow-hidden rounded-[32px] border border-white/45 bg-white/25 p-6 shadow-[0_24px_60px_-40px_rgba(30,77,64,0.55)] backdrop-blur sm:p-8">
+    <div class="mx-auto shell max-w-7xl px-4 sm:px-6 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
+      <div class="glass rounded-[32px] p-6 sm:p-8">
         <div class="mb-4 flex items-end justify-between gap-3">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/90">Pengingat</p>
+            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">Pengingat</p>
             <h2 class="heading mt-2 text-2xl font-extrabold text-white">Pengingat Harian</h2>
-            <p class="mt-1 text-sm text-white/85">Swipe untuk ganti kartu.</p>
+            <p class="mt-1 text-sm text-white/70">Swipe untuk ganti kartu.</p>
           </div>
           <div class="hidden items-center gap-2 sm:flex">
             <button id="reminderPrev" type="button" aria-label="Sebelumnya"
-              class="rounded-2xl border border-white/60 bg-white/20 px-3 py-2 text-xs font-semibold text-white backdrop-blur transition hover:bg-white/30">←</button>
+              class="btn rounded-2xl border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-white hover:bg-white/10">←</button>
             <button id="reminderNext" type="button" aria-label="Berikutnya"
-              class="rounded-2xl border border-white/60 bg-white/20 px-3 py-2 text-xs font-semibold text-white backdrop-blur transition hover:bg-white/30">→</button>
+              class="btn rounded-2xl border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-white hover:bg-white/10">→</button>
           </div>
         </div>
 
         <div id="reminderScroller"
-          class="scrollbar-none snap-scroll flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 py-2 sm:px-2"
-          style="WebkitOverflowScrolling:touch;">
+          class="scrollbar-none flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 py-2 sm:px-2"
+          style="scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
+
           @foreach($reminders as $idx => $it)
-            <article data-card class="snap-item snap-center">
-              <div class="relative w-[84vw] max-w-[560px] overflow-hidden rounded-[32px] border border-white/55 bg-white shadow-[0_18px_56px_-32px_rgba(0,0,0,0.45)] sm:w-[70vw]">
-                <div class="relative px-5 py-6 text-[#1E4D40] sm:px-7 sm:py-7">
-                  <div class="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-2xl bg-[#70978C]/15 text-[#1E4D40] ring-1 ring-[#1E4D40]/10">
-                    <span aria-hidden class="text-base">❝</span>
+            <article data-card class="snap-center">
+              <div class="relative w-[84vw] max-w-[560px] overflow-hidden rounded-[32px] border border-white/15 bg-white/5 shadow-[0_18px_56px_-32px_rgba(0,0,0,0.55)] sm:w-[70vw]">
+                <div class="relative px-5 py-6 text-white sm:px-7 sm:py-7">
+                  <div class="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-2xl bg-white/10 ring-1 ring-white/10 text-white/90">
+                    {!! $svg['quote'] !!}
                   </div>
 
-                  <p class="text-center text-xs font-semibold uppercase tracking-[0.45em] text-[#1E4D40]/60">PENGINGAT HARIAN</p>
+                  <p class="text-center text-xs font-semibold uppercase tracking-[0.45em] text-white/65">PENGINGAT HARIAN</p>
 
-                  <p class="arabic mt-3 text-center text-xl leading-[2.15] text-[#1E4D40] sm:text-2xl" dir="rtl">
+                  <p class="arabic mt-3 text-center text-xl leading-[2.15] text-white sm:text-2xl" dir="rtl">
                     {{ $it['arabic'] }}
                   </p>
 
                   @if(!empty($it['latin']))
-                    <p class="mt-2.5 text-center text-xs text-[#1E4D40]/70 sm:text-sm">{{ $it['latin'] }}</p>
+                    <p class="mt-2.5 text-center text-xs text-white/70 sm:text-sm">{{ $it['latin'] }}</p>
                   @endif
 
-                  <p class="mt-3.5 text-center text-xs font-medium text-[#1E4D40]/80 sm:text-sm">{{ $it['meaning'] }}</p>
+                  <p class="mt-3.5 text-center text-xs font-medium text-white/80 sm:text-sm">{{ $it['meaning'] }}</p>
 
                   <div class="mt-5 flex flex-wrap items-center justify-center gap-2">
-                    <span class="inline-flex items-center gap-2 rounded-full bg-[#EBB04D] px-3.5 py-1.5 text-xs font-semibold text-[#1E4D40]">
-                      <span class="h-1.5 w-1.5 rounded-full bg-[#1E4D40]"></span>
+                    <span class="inline-flex items-center gap-2 rounded-full bg-[var(--gold)] px-3.5 py-1.5 text-xs font-semibold text-[#13392f]">
+                      <span class="h-1.5 w-1.5 rounded-full bg-[#13392f]"></span>
                       {{ $it['ref'] }}
                     </span>
 
-                    <span class="inline-flex items-center gap-2 rounded-full bg-[#70978C]/15 px-3.5 py-1.5 text-xs font-semibold text-[#1E4D40] ring-1 ring-[#1E4D40]/10">
+                    <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white ring-1 ring-white/10">
                       {{ $it['kind'] }}
                     </span>
                   </div>
@@ -810,7 +761,7 @@ try {
                   @if(!empty($it['tags']))
                     <div class="mt-4 flex flex-wrap justify-center gap-2">
                       @foreach($it['tags'] as $t)
-                        <span class="rounded-full border border-[#1E4D40]/10 bg-white px-3 py-1 text-[11px] font-semibold text-[#1E4D40]/80">
+                        <span class="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold text-white/85">
                           #{{ $t }}
                         </span>
                       @endforeach
@@ -824,25 +775,25 @@ try {
 
         <div id="reminderDots" class="mt-4 flex justify-center gap-2"></div>
 
-        <p class="mt-4 rounded-2xl border border-white/45 bg-white/20 p-4 text-xs text-white/85">
+        <p class="mt-4 rounded-2xl border border-white/15 bg-white/5 p-4 text-xs text-white/70">
           Tips: navigasi cepat lewat <span class="font-semibold text-white">Bottom Bar</span>.
         </p>
       </div>
     </div>
   </section>
 
-  {{-- BOTTOM NAV (fungsi tetap: data-bottom-item + data-bottom-id) --}}
+  {{-- BOTTOM NAV --}}
   <nav class="fixed inset-x-0 bottom-0 z-50 pb-[env(safe-area-inset-bottom)]">
-    <div class="mx-auto home-shell max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="rounded-[26px] border border-white/25 bg-[#1E4D40]/92 p-2 shadow-[0_18px_60px_-35px_rgba(0,0,0,0.55)] backdrop-blur">
+    <div class="mx-auto shell max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="rounded-[26px] border border-white/12 bg-black/45 p-2 shadow-[0_18px_60px_-35px_rgba(0,0,0,0.75)] backdrop-blur">
         <div class="grid grid-cols-4 gap-1">
           @foreach($bottomNav as $n)
             <a href="{{ $n['href'] }}"
               data-bottom-item
               data-bottom-id="{{ $n['id'] }}"
-              class="bottom-item flex flex-col items-center justify-center gap-0.5 rounded-2xl px-2 py-2.5 text-center text-xs font-semibold transition"
+              class="bottom-item btn flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center text-xs font-semibold"
               aria-label="{{ $n['label'] }}">
-              <span class="text-base" aria-hidden>{{ $n['icon'] }}</span>
+              <span class="text-base inline-flex" aria-hidden>{!! $svg[$n['icon']] !!}</span>
               <span class="text-[11px]">{{ $n['label'] }}</span>
             </a>
           @endforeach
@@ -851,61 +802,60 @@ try {
     </div>
   </nav>
 
-  {{-- MOBILE DRAWER (id + data-* tetap) --}}
+  {{-- MOBILE DRAWER --}}
   <div id="mobileDrawerRoot" class="pointer-events-none fixed inset-0 z-[60]">
-    <div id="mobileDrawerOverlay" class="absolute inset-0 bg-black/50 opacity-0 transition-opacity"></div>
+    <div id="mobileDrawerOverlay" class="absolute inset-0 bg-black/60 opacity-0 transition-opacity"></div>
 
-    <aside id="mobileDrawer" class="absolute right-0 top-0 h-full w-[86vw] max-w-sm translate-x-full bg-[#1E4D40] text-white shadow-2xl transition-transform">
+    <aside id="mobileDrawer" class="absolute right-0 top-0 h-full w-[86vw] max-w-sm translate-x-full bg-[#13392f] text-white shadow-2xl transition-transform">
       <div class="flex h-full flex-col p-5">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-xs text-white/70">Menu</p>
+            <p class="text-xs text-white/60">Menu</p>
             <p class="heading text-lg font-extrabold">Masjid Agung Al-A&#39;la</p>
           </div>
-          <button data-close-drawer class="grid h-11 w-11 place-items-center rounded-2xl border border-white/25 bg-white/10 text-white" aria-label="Tutup menu" type="button">
-            ✕
+          <button data-close-drawer class="grid h-11 w-11 place-items-center rounded-2xl border border-white/15 bg-white/5 text-white" aria-label="Tutup menu" type="button">
+            {!! $svg['x'] !!}
           </button>
         </div>
 
         <div class="mt-5 space-y-2">
           <a href="#beranda" data-close-drawer class="flex items-center justify-between rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
-            <span>Beranda</span><span class="text-white/60">→</span>
+            <span>Beranda</span><span class="text-white/50">→</span>
           </a>
           <a href="#kegiatan" data-close-drawer class="flex items-center justify-between rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
-            <span>Kegiatan</span><span class="text-white/60">→</span>
+            <span>Kegiatan</span><span class="text-white/50">→</span>
           </a>
           <a href="#artikel" data-close-drawer class="flex items-center justify-between rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
-            <span>Artikel</span><span class="text-white/60">→</span>
+            <span>Artikel</span><span class="text-white/50">→</span>
           </a>
           <a href="#donasi" data-close-drawer class="flex items-center justify-between rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
-            <span>Donasi</span><span class="text-white/60">→</span>
+            <span>Donasi</span><span class="text-white/50">→</span>
           </a>
         </div>
 
         <div class="mt-4 grid grid-cols-2 gap-2">
-          <button class="rounded-2xl border border-white/30 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15" type="button">
+          <button class="btn rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10" type="button">
             Masuk
           </button>
-          <button class="rounded-2xl bg-[#EBB04D] px-4 py-3 text-sm font-semibold text-[#1E4D40] shadow transition hover:brightness-110" type="button">
+          <button class="btn rounded-2xl bg-[var(--gold)] px-4 py-3 text-sm font-semibold text-[#13392f] shadow" type="button">
             Daftar
           </button>
         </div>
 
-        <div class="mt-4 rounded-2xl border border-white/15 bg-white/10 p-4 text-xs text-white/75">
+        <div class="mt-4 rounded-2xl border border-white/15 bg-white/5 p-4 text-xs text-white/70">
           Tips: navigasi cepat lewat <span class="font-semibold text-white">Bottom Bar</span>.
         </div>
 
-        <div class="mt-auto pt-4 text-[11px] text-white/60">
+        <div class="mt-auto pt-4 text-[11px] text-white/55">
           © {{ date('Y') }} Masjid Agung Al-A&#39;la
         </div>
       </div>
     </aside>
   </div>
 
-  {{-- SCRIPTS (fungsi tetap: drawer, animate, bottom nav active, reminder carousel) --}}
+  {{-- SCRIPTS (drawer, animate, bottom nav active, reminder carousel) --}}
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // ===== Drawer open/close =====
       const drawerRoot = document.getElementById('mobileDrawerRoot');
       const overlay = document.getElementById('mobileDrawerOverlay');
       const drawer = document.getElementById('mobileDrawer');
@@ -931,7 +881,7 @@ try {
       overlay?.addEventListener('click', () => setDrawer(false));
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setDrawer(false); });
 
-      // ===== Smooth scroll for hash links (biar enak + auto close drawer) =====
+      // Smooth scroll for hash links
       document.querySelectorAll('a[href^="#"]').forEach(a => {
         a.addEventListener('click', (e) => {
           const href = a.getAttribute('href');
@@ -945,7 +895,7 @@ try {
         });
       });
 
-      // ===== Animate on view =====
+      // Animate on view
       const animEls = Array.from(document.querySelectorAll('[data-animate]'));
       if ('IntersectionObserver' in window && animEls.length) {
         const obs = new IntersectionObserver((entries, observer) => {
@@ -964,7 +914,7 @@ try {
         });
       }
 
-      // ===== Bottom nav active section =====
+      // Bottom nav active section
       const sectionIds = ['beranda','kegiatan','artikel','donasi'];
       const sections = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
       const bottomItems = Array.from(document.querySelectorAll('[data-bottom-item]'));
@@ -987,7 +937,7 @@ try {
         sections.forEach(sec => secObs.observe(sec));
       }
 
-      // ===== Reminder carousel controls + dots =====
+      // Reminder dots
       const scroller = document.getElementById('reminderScroller');
       const prevBtn = document.getElementById('reminderPrev');
       const nextBtn = document.getElementById('reminderNext');
@@ -998,7 +948,7 @@ try {
         const dots = cards.map((_, i) => {
           const b = document.createElement('button');
           b.type = 'button';
-          b.className = 'h-2.5 w-2.5 rounded-full bg-white/40 transition';
+          b.className = 'h-2.5 w-2.5 rounded-full bg-white/30 transition';
           b.setAttribute('aria-label', `Buka kartu ${i+1}`);
           b.dataset.dotIndex = String(i);
           dotsWrap.appendChild(b);
@@ -1006,7 +956,6 @@ try {
         });
 
         function getActiveIndex() {
-          // cari card paling dekat dengan tengah viewport scroller
           const rect = scroller.getBoundingClientRect();
           const mid = rect.left + rect.width / 2;
           let bestIdx = 0, bestDist = Infinity;
@@ -1022,7 +971,7 @@ try {
         function setDots(activeIdx) {
           dots.forEach((d, i) => {
             d.classList.toggle('bg-white', i === activeIdx);
-            d.classList.toggle('bg-white/40', i !== activeIdx);
+            d.classList.toggle('bg-white/30', i !== activeIdx);
           });
         }
 
@@ -1057,109 +1006,85 @@ try {
       }
     });
   </script>
+
+  {{-- Jadwal Sholat realtime + countdown (WITA) --}}
+  <script>
+    (() => {
+      const TZ = 'Asia/Makassar';
+      const pad = (n) => String(n).padStart(2, '0');
+
+      function getNowPartsTZ() {
+        const parts = new Intl.DateTimeFormat('en-GB', {
+          timeZone: TZ,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        }).formatToParts(new Date());
+
+        const map = {};
+        for (const p of parts) if (p.type !== 'literal') map[p.type] = p.value;
+        return map;
+      }
+
+      function dateFromParts(parts, hhmmss) {
+        return new Date(`${parts.year}-${parts.month}-${parts.day}T${hhmmss}`);
+      }
+
+      const clockEl = document.getElementById('realtimeClock');
+      const nextBadgeEl = document.getElementById('nextPrayerBadge');
+      const countdownEl = document.getElementById('nextCountdown');
+      const cards = Array.from(document.querySelectorAll('.prayer-card'));
+
+      function setCardActive(card, isActive) {
+        card.classList.toggle('is-active', !!isActive);
+      }
+
+      function tick() {
+        const parts = getNowPartsTZ();
+        const now = dateFromParts(parts, `${parts.hour}:${parts.minute}:${parts.second}`);
+
+        if (clockEl) clockEl.textContent = `${parts.hour}:${parts.minute}:${parts.second}`;
+
+        const prayers = cards.map((card) => {
+          const name = card.dataset.prayer || '';
+          const time = card.dataset.time || '';
+          if (!/^\d{2}:\d{2}$/.test(time)) return null;
+          const dt = dateFromParts(parts, `${time}:00`);
+          return { card, name, time, dt };
+        }).filter(Boolean).sort((a, b) => a.dt - b.dt);
+
+        if (!prayers.length) return;
+
+        let next = prayers.find(p => p.dt > now);
+        if (!next) {
+          next = { ...prayers[0] };
+          next.dt = new Date(next.dt.getTime() + 24 * 60 * 60 * 1000);
+        }
+
+        if (nextBadgeEl) nextBadgeEl.textContent = `Next: ${next.name}`;
+
+        prayers.forEach(p => setCardActive(p.card, false));
+
+        const nextToday = prayers.find(p => p.name === next.name && p.time === next.time);
+        if (nextToday) setCardActive(nextToday.card, true);
+
+        if (countdownEl) {
+          let diff = Math.max(0, Math.floor((next.dt - now) / 1000));
+          const h = Math.floor(diff / 3600); diff %= 3600;
+          const m = Math.floor(diff / 60);
+          const s = diff % 60;
+          countdownEl.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+        }
+      }
+
+      tick();
+      setInterval(tick, 1000);
+    })();
+  </script>
+
 </div>
-
-
-<script>
-(() => {
-  const TZ = 'Asia/Makassar'; // Bali = WITA
-  const pad = (n) => String(n).padStart(2, '0');
-
-  function getNowPartsTZ() {
-    const parts = new Intl.DateTimeFormat('en-GB', {
-      timeZone: TZ,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    }).formatToParts(new Date());
-
-    const map = {};
-    for (const p of parts) {
-      if (p.type !== 'literal') map[p.type] = p.value;
-    }
-    return map; // year, month, day, hour, minute, second
-  }
-
-  function dateFromParts(parts, hhmmss) {
-    return new Date(`${parts.year}-${parts.month}-${parts.day}T${hhmmss}`);
-  }
-
-  const clockEl = document.getElementById('realtimeClock');
-  const nextBadgeEl = document.getElementById('nextPrayerBadge');
-  const countdownEl = document.getElementById('nextCountdown');
-  const cards = Array.from(document.querySelectorAll('.prayer-card'));
-
-  function setCardActive(card, isActive) {
-    const nameEl = card.querySelector('.prayer-name');
-    const timeEl = card.querySelector('.prayer-time');
-
-    if (isActive) {
-      card.classList.add('bg-[#EBB04D]');
-      card.classList.remove('bg-white/15');
-
-      nameEl && nameEl.classList.add('text-[#1E4D40]');
-      nameEl && nameEl.classList.remove('text-white/85');
-
-      timeEl && timeEl.classList.add('text-[#1E4D40]');
-      timeEl && timeEl.classList.remove('text-white');
-    } else {
-      card.classList.remove('bg-[#EBB04D]');
-      card.classList.add('bg-white/15');
-
-      nameEl && nameEl.classList.remove('text-[#1E4D40]');
-      nameEl && nameEl.classList.add('text-white/85');
-
-      timeEl && timeEl.classList.remove('text-[#1E4D40]');
-      timeEl && timeEl.classList.add('text-white');
-    }
-  }
-
-  function tick() {
-    const parts = getNowPartsTZ();
-    const now = dateFromParts(parts, `${parts.hour}:${parts.minute}:${parts.second}`);
-
-    if (clockEl) clockEl.textContent = `${parts.hour}:${parts.minute}:${parts.second}`;
-
-    const prayers = cards.map((card) => {
-      const name = card.dataset.prayer || '';
-      const time = card.dataset.time || '';
-      if (!/^\d{2}:\d{2}$/.test(time)) return null;
-
-      const dt = dateFromParts(parts, `${time}:00`);
-      return { card, name, time, dt };
-    }).filter(Boolean).sort((a, b) => a.dt - b.dt);
-
-    if (!prayers.length) return;
-
-    let next = prayers.find(p => p.dt > now);
-    if (!next) {
-      next = { ...prayers[0] };
-      next.dt = new Date(next.dt.getTime() + 24 * 60 * 60 * 1000);
-    }
-
-    if (nextBadgeEl) nextBadgeEl.textContent = `Next: ${next.name}`;
-
-    prayers.forEach(p => setCardActive(p.card, false));
-
-    const nextToday = prayers.find(p => p.name === next.name && p.time === next.time);
-    if (nextToday) setCardActive(nextToday.card, true);
-
-    if (countdownEl) {
-      let diff = Math.max(0, Math.floor((next.dt - now) / 1000));
-      const h = Math.floor(diff / 3600); diff %= 3600;
-      const m = Math.floor(diff / 60);
-      const s = diff % 60;
-      countdownEl.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
-    }
-  }
-
-  tick();
-  setInterval(tick, 1000);
-})();
-</script>
-
 </x-front-layout>

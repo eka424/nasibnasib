@@ -14,8 +14,8 @@
                         <div class="flex items-center gap-2">
                             <a href="{{ route('admin.galeris.create') }}"
                                 class="inline-flex items-center justify-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor" stroke-width="2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
                                 </svg>
                                 Upload Media
@@ -40,6 +40,7 @@
                                     Saring media galeri berdasarkan kriteria tertentu.
                                 </p>
                             </div>
+
                             <form method="GET" class="flex flex-col gap-4 p-6 pt-0 md:flex-row md:items-end">
                                 <div class="relative flex-1">
                                     <span class="pointer-events-none absolute left-2.5 top-2.5 inline-flex text-slate-400">
@@ -55,7 +56,7 @@
                                 </div>
 
                                 <select name="tipe"
-                                    class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/10 md:w-[180px]">
+                                    class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/10 md:w-[160px]">
                                     @foreach ($typeOptions as $value => $label)
                                         <option value="{{ $value }}" @selected(($filters['tipe'] ?? '') === $value)>
                                             {{ $label }}
@@ -63,8 +64,24 @@
                                     @endforeach
                                 </select>
 
+                                {{-- FILTER BARU: KATEGORI --}}
+                                <select name="kategori" id="filterKategori"
+                                    class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/10 md:w-[160px]">
+                                    @foreach ($deptOptions as $value => $label)
+                                        <option value="{{ $value }}" @selected(($filters['kategori'] ?? '') === $value)>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+
+                                {{-- FILTER BARU: SEKSI (diisi JS) --}}
+                                <select name="seksi" id="filterSeksi"
+                                    class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/10 md:w-[240px]">
+                                    <option value="">Semua Seksi</option>
+                                </select>
+
                                 <select name="sort"
-                                    class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/10 md:w-[180px]">
+                                    class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/10 md:w-[160px]">
                                     @foreach ($sortOptions as $value => $label)
                                         <option value="{{ $value }}" @selected(($filters['sort'] ?? 'newest') === $value)>
                                             {{ $label }}
@@ -92,9 +109,16 @@
                             @forelse ($galeris as $galeri)
                                 @php
                                     $isLocal = $galeri->url_file && ! \Illuminate\Support\Str::startsWith($galeri->url_file, 'http');
-                                    $mediaUrl = $isLocal ? Storage::url($galeri->url_file) : $galeri->url_file;
+                                    $mediaUrl = $isLocal ? \Illuminate\Support\Facades\Storage::url($galeri->url_file) : $galeri->url_file;
                                     $isImage = $galeri->tipe === 'image';
+
+                                    $deptLabel = [
+                                        'idarah' => 'Idarah',
+                                        'imarah' => 'Imarah',
+                                        'riayah' => 'Riayah',
+                                    ][$galeri->kategori ?? 'idarah'] ?? 'Idarah';
                                 @endphp
+
                                 <div class="flex h-full flex-col rounded-lg border border-slate-200 bg-card text-card-foreground shadow-sm">
                                     <div class="relative aspect-video w-full overflow-hidden rounded-t-lg bg-slate-100">
                                         @if ($isImage)
@@ -111,19 +135,35 @@
                                                 </svg>
                                             </div>
                                         @endif
+
+                                        {{-- badge kategori --}}
+                                        <div class="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-800">
+                                            {{ $deptLabel }}
+                                        </div>
+
+                                        {{-- badge tipe --}}
+                                        <div class="absolute right-2 top-2 rounded-full bg-slate-900/85 px-2.5 py-1 text-[11px] font-semibold text-white">
+                                            {{ $isImage ? 'Gambar' : 'Video' }}
+                                        </div>
                                     </div>
+
                                     <div class="flex flex-1 flex-col gap-2 p-4">
-                                        <div class="flex items-start justify-between gap-3">
-                                            <h3 class="text-lg font-semibold text-slate-900">{{ $galeri->judul }}</h3>
-                                            <span
-                                                class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
-                                                {{ $isImage ? 'Gambar' : 'Video' }}
+                                        <h3 class="text-base font-semibold text-slate-900 leading-snug">
+                                            {{ $galeri->judul }}
+                                        </h3>
+
+                                        <div class="text-xs text-slate-500">
+                                            Seksi:
+                                            <span class="font-medium text-slate-700">
+                                                {{ $galeri->seksi ?: '—' }}
                                             </span>
                                         </div>
+
                                         <p class="text-sm text-slate-500">
                                             {{ $galeri->deskripsi ? \Illuminate\Support\Str::limit($galeri->deskripsi, 80) : 'Belum ada deskripsi' }}
                                         </p>
                                     </div>
+
                                     <div class="flex items-center justify-between border-t border-slate-200 px-4 py-3 text-xs text-slate-500">
                                         <span>Diunggah {{ $galeri->created_at->translatedFormat('d M Y') }}</span>
                                         <details class="relative inline-block text-left">
@@ -196,9 +236,45 @@
                                 </a>
                             </nav>
                         </div>
+
                     </div>
                 </main>
             </div>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sectionsMap = @json($sectionsMap ?? []);
+        const kategoriEl = document.getElementById('filterKategori');
+        const seksiEl = document.getElementById('filterSeksi');
+
+        const currentKategori = @json($filters['kategori'] ?? '');
+        const currentSeksi = @json($filters['seksi'] ?? '');
+
+        function fillSeksi(kategori) {
+            seksiEl.innerHTML = '<option value="">Semua Seksi</option>';
+
+            if (!kategori) return; // kalau kategori kosong => semua seksi
+
+            const list = sectionsMap[kategori] || [];
+            list.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = s;
+                if (s === currentSeksi) opt.selected = true;
+                seksiEl.appendChild(opt);
+            });
+        }
+
+        // init
+        fillSeksi(currentKategori);
+
+        kategoriEl.addEventListener('change', () => {
+            // kalau ganti kategori, reset seksi biar tidak mismatch
+            fillSeksi(kategoriEl.value);
+            seksiEl.value = '';
+        });
+    });
+    </script>
 @endsection
