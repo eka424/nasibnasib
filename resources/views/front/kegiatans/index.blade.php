@@ -245,7 +245,7 @@
           <div class="relative px-5 py-4">
             <p class="text-xs font-semibold uppercase tracking-[0.25em] text-white/75">Kegiatan</p>
             <p class="text-lg font-extrabold text-white leading-tight">Semua agenda masjid dalam satu tempat</p>
-            <p class="mt-1 text-sm text-white/75">Swipe di mobile, grid di desktop. Klik detail untuk info lengkap.</p>
+            <p class="mt-1 text-sm text-white/75">Klik detail untuk info lengkap dan jika ingin mendaftar</p>
           </div>
         </div>
       </div>
@@ -347,11 +347,6 @@
                   @if ($status === 'dibuka')
                     <form action="{{ route('kegiatan.daftar', $kegiatan) }}" method="POST">
                       @csrf
-                      <button type="submit"
-                        class="inline-flex items-center justify-center rounded-2xl px-3 py-2 text-xs font-semibold text-[#13392f]"
-                        style="background: {{ $accent }};">
-                        Daftar
-                      </button>
                     </form>
                   @endif
                 @endauth

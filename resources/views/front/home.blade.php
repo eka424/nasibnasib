@@ -161,7 +161,23 @@
 @endphp
 
 {{-- IMPORTANT: Background must match front-layout (solid #13392f) --}}
-<div class="min-h-screen w-full overflow-x-hidden bg-[#13392f] text-white pb-[calc(92px+env(safe-area-inset-bottom))]">
+<div class="min-h-screen w-full overflow-x-hidden bg-[#13392f] text-white relative">
+
+  {{-- PATTERN BACKGROUND (30%) --}}
+  <div
+    aria-hidden="true"
+    class="fixed inset-0 pointer-events-none z-0 opacity-5"
+    style="
+      background-image: url('{{ asset('images/pattern.png') }}');
+      background-repeat: repeat;
+      background-size: 280px;
+    "
+  ></div>
+
+  {{-- SEMUA KONTEN DI BAWAH INI --}}
+  <div class="relative z-10">
+
+
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Amiri:wght@400;700&display=swap');
@@ -236,8 +252,8 @@
 
   {{-- HERO --}}
   <section id="beranda" class="relative min-h-[100svh] pt-24">
-    <div class="mx-auto shell max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
-      <div class="grid gap-6 lg:grid-cols-12 lg:items-stretch opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
+    <div class="mx-auto w-full px-4 sm:px-6 lg:px-10 2xl:px-16">
+      <div class="grid gap-6 2xl:gap-10 lg:grid-cols-12 lg:items-stretch opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
 
         <div class="lg:col-span-7">
           <div class="glass rounded-[28px] p-6 sm:p-8">
@@ -408,7 +424,7 @@
 
   {{-- STATS --}}
   <section id="stats" class="relative py-10 sm:py-14">
-    <div class="mx-auto shell max-w-7xl px-4 sm:px-6 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
+    <div class="mx-auto w-full px-4 sm:px-6 lg:px-10 2xl:px-16" opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
       <div class="glass rounded-[28px] p-6 sm:p-8">
         <div class="mb-4 flex items-end justify-between gap-4">
           <div>
@@ -443,7 +459,7 @@
 
   {{-- KEGIATAN --}}
   <section id="kegiatan" class="py-12 sm:py-16">
-    <div class="mx-auto shell max-w-7xl px-4 sm:px-6 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
+    <div class="mx-auto w-full px-4 sm:px-6 lg:px-10 2xl:px-16" opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
       <div class="mb-5 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">Highlight</p>
@@ -511,7 +527,7 @@
 
  {{-- ARTIKEL --}}
 <section id="artikel" class="py-12 sm:py-16">
-  <div class="mx-auto shell max-w-7xl px-4 sm:px-6 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
+  <div class="mx-auto w-full px-4 sm:px-6 lg:px-10 2xl:px-16" opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
     <div class="glass rounded-[32px] p-6 sm:p-8">
       <div class="mb-5 flex items-end justify-between gap-3">
         <div>
@@ -661,7 +677,7 @@
 
   {{-- PENGINGAT --}}
   <section class="relative py-12 sm:py-14">
-    <div class="mx-auto shell max-w-7xl px-4 sm:px-6 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
+    <div class="mx-auto w-full px-4 sm:px-6 lg:px-10 2xl:px-16" opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
       <div class="glass rounded-[32px] p-6 sm:p-8">
         <div class="mb-4 flex items-end justify-between gap-3">
           <div>
@@ -738,7 +754,7 @@
 
   {{-- BOTTOM NAV --}}
   <nav class="fixed inset-x-0 bottom-0 z-50 pb-[env(safe-area-inset-bottom)]">
-    <div class="mx-auto shell max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto w-full px-4 sm:px-6 lg:px-10 2xl:px-16">
       <div class="rounded-[26px] border border-white/12 bg-black/45 p-2 shadow-[0_18px_60px_-35px_rgba(0,0,0,0.75)] backdrop-blur">
         <div class="grid grid-cols-4 gap-1">
           @foreach($bottomNav as $n)
@@ -1041,5 +1057,7 @@
     })();
   </script>
 
-</div>
+</div> {{-- end z-10 wrapper --}}
+</div> {{-- end main wrapper --}}
 </x-front-layout>
+

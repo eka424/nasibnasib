@@ -81,6 +81,44 @@
   :root { --bg: {{ $bg }}; --accent: {{ $accent }}; --primary: {{ $primary }}; }
   svg { stroke: currentColor; }
   svg * { vector-effect: non-scaling-stroke; }
+  <style>
+  :root { --bg: {{ $bg }}; --accent: {{ $accent }}; --primary: {{ $primary }}; }
+  svg { stroke: currentColor; }
+  svg * { vector-effect: non-scaling-stroke; }
+
+  /* ===== FLASH "SUDAH TERDAFTAR" KEBYET INFINITE ===== */
+  @keyframes kebyetFlash {
+    0%   { transform: translateY(0);   filter: brightness(1); }
+    20%  { transform: translateY(-1px); filter: brightness(1.15); }
+    40%  { transform: translateY(0);   filter: brightness(1); }
+    60%  { transform: translateY(-1px); filter: brightness(1.25); }
+    100% { transform: translateY(0);   filter: brightness(1); }
+  }
+
+  @keyframes glowFlash {
+    0%   { box-shadow: 0 0 0 0 rgba(231,177,75,0.0), 0 18px 60px -45px rgba(0,0,0,0.35); }
+    25%  { box-shadow: 0 0 0 3px rgba(231,177,75,0.55), 0 0 30px rgba(231,177,75,0.35), 0 18px 60px -45px rgba(0,0,0,0.35); }
+    50%  { box-shadow: 0 0 0 0 rgba(231,177,75,0.0), 0 18px 60px -45px rgba(0,0,0,0.35); }
+    75%  { box-shadow: 0 0 0 3px rgba(231,177,75,0.65), 0 0 34px rgba(231,177,75,0.45), 0 18px 60px -45px rgba(0,0,0,0.35); }
+    100% { box-shadow: 0 0 0 0 rgba(231,177,75,0.0), 0 18px 60px -45px rgba(0,0,0,0.35); }
+  }
+
+  .flash-kebyet {
+    border-color: rgba(231,177,75,0.55) !important;
+    background: rgba(231,177,75,0.10) !important;
+    animation: glowFlash 1.1s ease-in-out infinite, kebyetFlash 1.1s ease-in-out infinite;
+  }
+
+  .flash-kebyet .flash-text {
+    color: #FFD66B; /* kuning kontras */
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    text-shadow: 0 0 10px rgba(231,177,75,0.25);
+  }
+
+  .flash-kebyet .flash-icon {
+    color: #FFD66B;
+  }
 </style>
 
 <div class="min-h-screen text-white" style="background: var(--bg);">
@@ -134,28 +172,43 @@
       </nav>
 
       {{-- FLASH --}}
-      @if (session('kegiatan_flash'))
-        @php
-          $flash = session('kegiatan_flash');
-          $flashMsg = $flash['message'] ?? '';
-          $flashGcal = $flash['gcal'] ?? null;
-        @endphp
+@if (session('kegiatan_flash'))
+  @php
+    $flash = session('kegiatan_flash');
+    $flashMsg = $flash['message'] ?? '';
+    $flashGcal = $flash['gcal'] ?? null;
 
-        <div class="mt-4 rounded-2xl border border-white/14 bg-white/10 p-4 text-white shadow-[0_18px_60px_-45px_rgba(0,0,0,0.35)] backdrop-blur">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="text-sm font-semibold">
-              {!! $ico['check'] !!} <span class="ml-1">{{ $flashMsg }}</span>
-            </div>
+    // biar cuma "sudah terdaftar" yang kebyet (optional)
+    $isAlready = str_contains(mb_strtolower($flashMsg), 'sudah terdaftar');
+  @endphp
 
-            @if($flashGcal)
-              <a href="{{ $flashGcal }}" target="_blank" rel="noreferrer"
-                class="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/6 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10">
-                {!! $ico['calendar'] !!} Tambah ke Google Calendar
-              </a>
-            @endif
-          </div>
-        </div>
-      @endif
+  <div class="mt-4 rounded-2xl border border-white/14 bg-white/10 p-4 text-white backdrop-blur
+              shadow-[0_18px_60px_-45px_rgba(0,0,0,0.35)]
+              {{ $isAlready ? 'flash-kebyet' : '' }}">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div class="text-sm font-semibold">
+        <span class="{{ $isAlready ? 'flash-icon' : '' }}">{!! $ico['check'] !!}</span>
+        <span class="ml-1 {{ $isAlready ? 'flash-text' : '' }}">{{ $flashMsg }}</span>
+      </div>
+
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+  <a href="{{ route('kegiatan.riwayat') }}"
+    class="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/6 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10">
+    {!! $ico['list'] !!} Lihat Riwayat
+  </a>
+
+  @if($flashGcal)
+    <a href="{{ $flashGcal }}" target="_blank" rel="noreferrer"
+      class="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/6 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10">
+      {!! $ico['calendar'] !!} Tambah ke Google Calendar
+    </a>
+  @endif
+</div>
+
+    </div>
+  </div>
+@endif
+
 
       {{-- Chips --}}
       <div class="mt-4 flex flex-wrap items-center gap-2">

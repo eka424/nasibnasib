@@ -74,6 +74,7 @@ Route::get('/artikel/{artikel:slug}', [ArtikelFrontController::class, 'show'])->
 // ===============================
 Route::get('/galeri', [GaleriFrontController::class, 'index'])->name('galeri.index');
 Route::get('/galeri/{galeri}', [GaleriFrontController::class, 'show'])->name('galeri.show');
+Route::get('/galeri/{galeri}', [GaleriFrontController::class, 'show'])->name('galeri.show');
 
 
 // ===============================

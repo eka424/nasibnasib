@@ -55,7 +55,7 @@ class KegiatanFrontController extends Controller
 
     $message = $isNew
         ? "Pendaftaran berhasil. Anda sudah terdaftar, jangan lupa datang pada tanggal {$kegiatan->tanggal_mulai_label}."
-        : "Anda sudah terdaftar. Jangan lupa datang pada tanggal {$kegiatan->tanggal_mulai_label}.";
+        : "Alhamdulillah - Anda sudah terdaftar. Jangan lupa datang pada tanggal {$kegiatan->tanggal_mulai_label}.";
 
     return back()->with('kegiatan_flash', [
         'type' => 'success',

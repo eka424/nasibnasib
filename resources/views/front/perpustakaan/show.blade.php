@@ -219,11 +219,8 @@
                   <span class="font-semibold text-slate-900">{{ number_format($viewCount, 0, ',', '.') }}</span>
                 </div>
 
-                <div class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
-                  {!! $ico['download'] !!}
-                  <span class="text-slate-500">Diunduh</span>
-                  <span class="font-semibold text-slate-900">{{ number_format($downloadCount, 0, ',', '.') }}</span>
-                </div>
+        
+            
 
                 <div class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
                   <span class="font-semibold text-slate-500">Hal</span>
@@ -245,13 +242,7 @@
 
               {{-- Desktop actions --}}
               <div class="mt-6 hidden flex-wrap gap-2 sm:flex">
-                <a href="{{ $downloadUrl ?: '#' }}" target="_blank" rel="noreferrer"
-                   class="{{ $fileUrl ? 'text-[#13392f]' : 'cursor-not-allowed bg-slate-200 text-slate-500' }}
-                          inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-extrabold shadow-sm transition hover:brightness-105"
-                   style="{{ $fileUrl ? 'background: var(--accent);' : '' }}">
-                  {!! $ico['download'] !!} Unduh
-                </a>
-
+            
                 @if($fileUrl)
                   <a href="{{ $fileUrl }}" target="_blank" rel="noreferrer"
                      class="inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-extrabold text-emerald-700 shadow-sm transition hover:bg-emerald-100">
@@ -310,15 +301,9 @@
 
           <div class="{{ $glass }} p-5">
             <p class="text-sm font-semibold text-white">Aksi Cepat</p>
-            <p class="mt-1 text-xs text-white/70">Unduh atau simpan link untuk dibaca nanti.</p>
+            <p class="mt-1 text-xs text-white/70">simpan link untuk dibaca nanti.</p>
 
             <div class="mt-4 grid gap-2">
-              <a href="{{ $downloadUrl ?: '#' }}" target="_blank" rel="noreferrer"
-                 class="{{ $fileUrl ? 'text-[#13392f]' : 'cursor-not-allowed bg-white/20 text-white/50' }}
-                        inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-extrabold shadow-sm transition hover:brightness-105"
-                 style="{{ $fileUrl ? 'background: var(--accent);' : '' }}">
-                {!! $ico['download'] !!} Unduh Ebook
-              </a>
 
               @if($fileUrl)
                 <a href="{{ $fileUrl }}" target="_blank" rel="noreferrer"
@@ -337,9 +322,8 @@
           <div class="{{ $glass }} p-5">
             <p class="text-sm font-semibold text-white">Catatan</p>
             <ul class="mt-3 space-y-2 text-sm text-white/80">
-              <li class="flex gap-2"><span class="mt-0.5">•</span> Aktifkan mode baca malam agar nyaman.</li>
+              <li class="flex gap-2"><span class="mt-0.5">•</span> Selamat Membaca</li>
               <li class="flex gap-2"><span class="mt-0.5">•</span> Bagikan link agar jamaah lain ikut belajar.</li>
-              <li class="flex gap-2"><span class="mt-0.5">•</span> Pastikan koneksi stabil saat unduh.</li>
             </ul>
           </div>
 
@@ -352,12 +336,6 @@
   <div class="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-slate-950/75 p-3 backdrop-blur lg:hidden">
     <div class="mx-auto max-w-6xl px-1">
       <div class="grid grid-cols-2 gap-2">
-        <a href="{{ $downloadUrl ?: '#' }}" target="_blank" rel="noreferrer"
-           class="{{ $fileUrl ? 'text-[#13392f]' : 'cursor-not-allowed bg-white/20 text-white/50' }}
-                  w-full rounded-2xl px-4 py-3 text-center text-sm font-extrabold transition hover:brightness-105"
-           style="{{ $fileUrl ? 'background: var(--accent);' : '' }}">
-          Unduh
-        </a>
 
         <button type="button" data-copy-link
                 class="w-full rounded-2xl bg-white px-4 py-3 text-center text-sm font-extrabold text-emerald-700 hover:bg-emerald-50">

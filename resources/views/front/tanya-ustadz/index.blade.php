@@ -34,6 +34,48 @@
     border-color: rgba(15,23,42,0.10);
   }
   .form-dark::placeholder { color: rgba(15,23,42,0.45); }
+  /* highlight card saat klik ajukan pertanyaan */
+  /* kebyet-kebyet highlight */
+@keyframes kebyet {
+  0%   { box-shadow: 0 0 0 0 rgba(231,177,75,0), 0 18px 60px -45px rgba(0,0,0,0.55); transform: translateY(0); }
+  15%  { box-shadow: 0 0 0 3px rgba(231,177,75,0.70), 0 0 30px rgba(231,177,75,0.35), 0 18px 60px -45px rgba(0,0,0,0.55); transform: translateY(-1px); }
+  30%  { box-shadow: 0 0 0 0 rgba(231,177,75,0), 0 18px 60px -45px rgba(0,0,0,0.55); transform: translateY(0); }
+  45%  { box-shadow: 0 0 0 3px rgba(231,177,75,0.70), 0 0 34px rgba(231,177,75,0.40), 0 18px 60px -45px rgba(0,0,0,0.55); transform: translateY(-1px); }
+  60%  { box-shadow: 0 0 0 0 rgba(231,177,75,0), 0 18px 60px -45px rgba(0,0,0,0.55); transform: translateY(0); }
+  100% { box-shadow: 0 0 0 0 rgba(231,177,75,0), 0 18px 60px -45px rgba(0,0,0,0.55); transform: translateY(0); }
+}
+
+[data-ask-card].is-focus {
+  border-color: rgba(231,177,75,0.65) !important;
+  animation: kebyet 0.85s ease-out 1;
+}
+
+
+  /* modal popup */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 16px;
+  }
+  .modal-backdrop.show { display: flex; }
+
+  .modal-box {
+    width: 100%;
+    max-width: 420px;
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(19,57,47,0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 20px 70px -40px rgba(0,0,0,0.75);
+    color: #fff;
+    padding: 18px;
+  }
 </style>
 
 <div class="min-h-screen text-white" style="background: var(--bg);">
@@ -70,10 +112,13 @@
 
           <div class="flex flex-col gap-2 pt-3 sm:flex-row sm:flex-wrap sm:gap-3">
             <a href="#ajukan-pertanyaan"
-              class="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold text-[#13392f] transition hover:brightness-105 sm:w-auto"
-              style="background: var(--accent);">
-              {!! $ico['send'] !!} Ajukan Pertanyaan {!! $ico['arrow'] !!}
-            </a>
+  id="btnAjukanPertanyaan"
+  data-auth="{{ auth()->check() ? 1 : 0 }}"
+  class="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold text-[#13392f] transition hover:brightness-105 sm:w-auto"
+  style="background: var(--accent);">
+  {!! $ico['send'] !!} Ajukan Pertanyaan {!! $ico['arrow'] !!}
+</a>
+<span id="authState" class="hidden" data-auth="{{ auth()->check() ? 1 : 0 }}"></span>
 
             @auth
               <a href="{{ route('tanya-ustadz.my') }}"
@@ -218,7 +263,7 @@
 
       {{-- FORM --}}
       <div class="space-y-4">
-        <div id="ajukan-pertanyaan" class="{{ $glass }} p-6">
+        <div id="ajukan-pertanyaan" data-ask-card class="{{ $glass }} p-6">
           <h2 class="text-lg font-extrabold text-white">Ajukan Pertanyaan</h2>
           <p class="mt-1 text-xs text-white/70">Pertanyaan akan ditinjau sebelum dijawab dan ditampilkan.</p>
 
@@ -289,4 +334,109 @@
     </div>
   </main>
 </div>
+<div id="loginPopup" class="modal-backdrop" aria-hidden="true">
+  <div class="modal-box">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <p class="text-sm font-extrabold">Login dulu ya</p>
+        <p class="mt-1 text-xs text-white/75">
+          Kamu harus <span class="font-semibold text-white">login</span> / <span class="font-semibold text-white">daftar</span> dulu jika ingin bertanya.
+        </p>
+      </div>
+      <button type="button" data-close-modal
+        class="grid h-10 w-10 place-items-center rounded-2xl border border-white/12 bg-white/6 text-white hover:bg-white/10">
+        ✕
+      </button>
+    </div>
+
+    <div class="mt-4 grid grid-cols-2 gap-2">
+      <a href="{{ route('login') }}"
+        class="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/6 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10">
+        {!! $ico['user'] !!} Masuk
+      </a>
+      <a href="{{ route('register') }}"
+        class="inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold text-[#13392f] hover:brightness-105"
+        style="background: var(--accent);">
+        {!! $ico['arrow'] !!} Daftar
+      </a>
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('btnAjukanPertanyaan');
+    const modal = document.getElementById('loginPopup');
+    const askCard = document.querySelector('[data-ask-card]');
+    const textarea = document.querySelector('textarea[name="pertanyaan"]');
+    const authEl = document.getElementById('authState');
+
+    if (!btn) return;
+
+    function getIsAuth() {
+      // ambil dari marker dulu (lebih aman), fallback ke data-auth tombol
+      const v = (authEl?.dataset.auth ?? btn.dataset.auth ?? '0').toString().trim();
+      return v === '1' || v === 'true';
+    }
+
+    function openModal() {
+      if (!modal) return;
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      if (!modal) return;
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    // close modal actions
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+
+      modal.querySelectorAll('[data-close-modal]').forEach(el => {
+        el.addEventListener('click', closeModal);
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      const isAuth = getIsAuth();
+
+      if (!isAuth) {
+        openModal();
+        return;
+      }
+
+      // kalau login: scroll + highlight + focus input
+      const target = document.getElementById('ajukan-pertanyaan');
+      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      if (askCard) {
+  // restart animasi tiap klik
+  askCard.classList.remove('is-focus');
+  void askCard.offsetWidth; // paksa reflow biar animasi ke-reset
+  askCard.classList.add('is-focus');
+
+  setTimeout(() => askCard.classList.remove('is-focus'), 900);
+}
+
+
+      setTimeout(() => {
+        textarea?.focus({ preventScroll: true });
+      }, 450);
+    });
+  });
+</script>
+
+
 </x-front-layout>

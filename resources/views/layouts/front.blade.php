@@ -13,8 +13,7 @@
   </head>
 
   {{-- BACKGROUND FIX: solid #13392f, no gradient --}}
-  <body class="font-sans antialiased bg-[#13392f] text-white">
-    @unless($immersive ?? false)
+  <body class="bg-pattern font-sans antialiased bg-[#13392f] text-white">    @unless($immersive ?? false)
       @php
         $navLinks = [
   ['label' => 'Beranda', 'route' => 'home'],
@@ -220,11 +219,12 @@
       @endunless
 
       {{-- Page Content --}}
-      <main class="flex-1">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-10">
-          {{ $slot }}
-        </div>
-      </main>
+      <main class="flex-1 w-full">
+  <div class="w-full px-4 sm:px-6 lg:px-10 2xl:px-16 pb-10">
+    {{ $slot }}
+  </div>
+</main>
+
 
       @unless($immersive ?? false)
        {{-- FOOTER (RAPI + NARAHUBUNG + MEDIA ONLINE + MAPS) --}}

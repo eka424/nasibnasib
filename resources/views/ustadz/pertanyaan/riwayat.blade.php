@@ -30,11 +30,6 @@
                 <p class="text-sm text-gray-500 font-semibold">Dalam 30 Hari</p>
                 <p class="mt-3 text-4xl font-bold text-gray-900">{{ $pertanyaans->count() }}</p>
             </div>
-            <div class="rounded-3xl border border-gray-200 bg-white p-5 shadow">
-                <p class="text-sm text-gray-500 font-semibold">Rating Kepuasan</p>
-                <p class="mt-3 text-4xl font-bold text-gray-900">4.9/5</p>
-                <p class="text-xs text-gray-500 mt-6">Berdasarkan feedback jamaah</p>
-            </div>
         </div>
 
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
