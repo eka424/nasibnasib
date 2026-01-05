@@ -19,7 +19,7 @@ class KegiatanRequest extends FormRequest
             'tanggal_mulai' => ['required', 'date'],
             'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal_mulai'],
             'lokasi' => ['nullable', 'string', 'max:255'],
-            'poster' => ['nullable', 'image', 'max:4096'],
+            'poster' => ['nullable', 'string', 'max:2048'],
         ];
     }
 }

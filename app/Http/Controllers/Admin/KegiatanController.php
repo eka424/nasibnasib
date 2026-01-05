@@ -8,7 +8,6 @@ use App\Models\Kegiatan;
 use App\Models\PendaftaranKegiatan;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class KegiatanController extends Controller
@@ -95,7 +94,7 @@ class KegiatanController extends Controller
     public function store(KegiatanRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        $data['poster'] = $this->storePoster($request);
+        $data['poster'] = $this->normalizePosterUrl($data['poster'] ?? null);
 
         Kegiatan::create($data);
 
@@ -117,11 +116,7 @@ class KegiatanController extends Controller
     public function update(KegiatanRequest $request, Kegiatan $kegiatan): RedirectResponse
     {
         $data = $request->validated();
-
-        if ($request->hasFile('poster')) {
-            $this->deletePoster($kegiatan->poster);
-            $data['poster'] = $this->storePoster($request);
-        }
+        $data['poster'] = $this->normalizePosterUrl($data['poster'] ?? null);
 
         $kegiatan->update($data);
 
@@ -130,23 +125,34 @@ class KegiatanController extends Controller
 
     public function destroy(Kegiatan $kegiatan): RedirectResponse
     {
-        $this->deletePoster($kegiatan->poster);
         $kegiatan->delete();
 
         return redirect()->route('admin.kegiatans.index')->with('success', 'Kegiatan dihapus.');
     }
 
-    protected function storePoster(KegiatanRequest $request): ?string
-    {
-        return $request->hasFile('poster')
-            ? $request->file('poster')->store('posters', 'public')
-            : null;
+    protected function normalizePosterUrl(?string $url): ?string
+{
+    $url = trim((string) $url);
+    if ($url === '') return null;
+
+    // Ambil fileId dari berbagai format link Drive
+    $fileId = null;
+
+    if (preg_match('~drive\.google\.com/file/d/([^/]+)~', $url, $m)) $fileId = $m[1];
+    if (preg_match('~drive\.google\.com/open\?id=([^&]+)~', $url, $m)) $fileId = $m[1];
+    if (!$fileId && preg_match('~[?&]id=([^&]+)~', $url, $m)) $fileId = $m[1];
+
+    // Kalau user sudah input uc?....id=...
+    if (!$fileId && str_contains($url, 'drive.google.com/uc?') && preg_match('~[?&]id=([^&]+)~', $url, $m)) {
+        $fileId = $m[1];
     }
 
-    protected function deletePoster(?string $path): void
-    {
-        if ($path) {
-            Storage::disk('public')->delete($path);
-        }
+    // Kalau ketemu fileId → pakai thumbnail (paling stabil buat img)
+    if ($fileId) {
+        return "https://drive.google.com/thumbnail?id={$fileId}&sz=w1200";
     }
+
+    // selain drive, biarin
+    return $url;
+}
 }

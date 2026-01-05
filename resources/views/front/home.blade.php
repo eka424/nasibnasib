@@ -18,6 +18,7 @@
         'check' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
         'info' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-5"/><path d="M12 8h.01"/></svg>',
         'report' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h10l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v4h4"/><path d="M8 13h8"/><path d="M8 17h6"/><path d="M8 9h4"/></svg>',
+        'wallet' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M17 11h4"/><path d="M3 9h18"/></svg>',
         'card' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>',
         'time' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
         'pin' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-4.4 7-10a7 7 0 0 0-14 0c0 5.6 7 10 7 10z"/><circle cx="12" cy="11" r="2"/></svg>',
@@ -36,7 +37,6 @@
         ['id' => 'beranda', 'label' => 'Home', 'href' => route('home'), 'icon' => 'home', 'type' => 'link'],
         ['id' => 'kegiatan', 'label' => 'Kegiatan', 'href' => route('kegiatan.index'), 'icon' => 'calendar', 'type' => 'link'],
         ['id' => 'artikel', 'label' => 'Artikel', 'href' => route('artikel.index'), 'icon' => 'book', 'type' => 'link'],
-        ['id' => 'donasi', 'label' => 'Donasi', 'href' => route('donasi.index'), 'icon' => 'heart', 'type' => 'link'],
     ];
 
     $quickAmounts = [
@@ -243,7 +243,7 @@
           <div class="glass rounded-[28px] p-6 sm:p-8">
             <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white ring-1 ring-white/15">
               <span class="inline-flex text-white/90">{!! $svg['spark'] !!}</span>
-              Pantau kegiatan • Artikel • Donasi
+              Pantau kegiatan • Artikel • Sedekah
             </div>
 
             <h1 class="heading mt-4 text-4xl font-extrabold leading-tight text-white sm:text-5xl">
@@ -269,12 +269,30 @@
                 <span class="inline-flex">{!! $svg['book'] !!}</span>
                 Baca Artikel
               </a>
-              <a href="{{ route('donasi.index') }}"
-                class="btn inline-flex items-center justify-center gap-2 rounded-full bg-[var(--gold)] px-6 py-3 text-sm font-semibold text-[#13392f] shadow">
-                <span class="inline-flex">{!! $svg['heart'] !!}</span>
-                Mulai Donasi
               </a>
             </div>
+{{-- CTA Transparansi Keuangan --}}
+<div class="mt-3">
+  <a href="{{ route('public.finance') }}"
+     class="btn flex items-center justify-between gap-3 rounded-[22px] border border-white/15 bg-white/5 px-5 py-4 text-white shadow-sm hover:bg-white/10">
+    <div class="flex items-center gap-3">
+      <span class="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--gold)] text-[#13392f] shadow">
+        {!! $svg['wallet'] !!}
+      </span>
+      <div class="min-w-0">
+        <div class="heading text-sm sm:text-base font-extrabold text-white">
+          Transparansi Keuangan Masjid Agung Al-A&#39;la
+        </div>
+        <div class="text-xs text-white/70">
+          Lihat pemasukan, pengeluaran, saldo, & bukti transaksi publik.
+        </div>
+      </div>
+    </div>
+    <span class="inline-flex text-white/85">
+      {!! $svg['arrow_right'] !!}
+    </span>
+  </a>
+</div>
 
             <div class="mt-7 grid gap-3 sm:grid-cols-2">
               <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
@@ -300,10 +318,6 @@
               <a href="#kegiatan" class="btn inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-white/90">
                 <span class="inline-flex">{!! $svg['calendar'] !!}</span>
                 Lihat highlight kegiatan
-              </a>
-              <a href="#donasi" class="btn inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-white/90">
-                <span class="inline-flex">{!! $svg['heart'] !!}</span>
-                Program donasi aktif
               </a>
             </div>
           </div>
@@ -378,10 +392,6 @@
                   <span class="inline-flex">{!! $svg['calendar'] !!}</span>
                   Lihat Agenda
                 </a>
-                <a href="{{ route('donasi.index') }}"
-                  class="btn inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-white shadow ring-1 ring-white/15">
-                  <span class="inline-flex">{!! $svg['heart'] !!}</span>
-                  Donasi Sekarang
                 </a>
               </div>
 
@@ -516,9 +526,39 @@
         @if($featuredArtikel)
           @php
             $thumb = $featuredArtikel->thumbnail ?? null;
-            $thumbUrl = $thumb
-              ? (\Illuminate\Support\Str::startsWith($thumb, ['http://','https://']) ? $thumb : asset($thumb))
-              : $masjidImage;
+            if ($thumb) {
+              if (\Illuminate\Support\Str::startsWith($thumb, ['http://','https://'])) {
+                $thumbUrl = $thumb;
+              } else {
+                $normalized = ltrim($thumb, '/');
+                if (\Illuminate\Support\Str::startsWith($normalized, 'storage/')) {
+                  $normalized = \Illuminate\Support\Str::after($normalized, 'storage/');
+                } elseif (!\Illuminate\Support\Str::contains($normalized, '/')) {
+                  $normalized = 'thumbnails/' . $normalized;
+                }
+                $disk = \Illuminate\Support\Facades\Storage::disk('public');
+                if (!$disk->exists($normalized) && !\Illuminate\Support\Str::contains($normalized, '.')) {
+                  foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
+                    $candidate = $normalized . '.' . $ext;
+                    if ($disk->exists($candidate)) {
+                      $normalized = $candidate;
+                      break;
+                    }
+                  }
+                  if (!$disk->exists($normalized)) {
+                    $base = basename($normalized);
+                    $match = collect($disk->files('thumbnails'))
+                      ->first(fn ($f) => \Illuminate\Support\Str::startsWith(basename($f), $base . '.'));
+                    if ($match) {
+                      $normalized = $match;
+                    }
+                  }
+                }
+                $thumbUrl = $disk->url($normalized);
+              }
+            } else {
+              $thumbUrl = $masjidImage;
+            }
           @endphp
 
           <a href="{{ route('artikel.show', $featuredArtikel) }}" class="group relative overflow-hidden rounded-[28px] border border-white/15 bg-white/5 text-white shadow-md lg:col-span-3">
@@ -557,9 +597,39 @@
           @forelse($otherArtikels->take(4) as $a)
             @php
               $thumb = $a->thumbnail ?? null;
-              $thumbUrl = $thumb
-                ? (\Illuminate\Support\Str::startsWith($thumb, ['http://','https://']) ? $thumb : asset($thumb))
-                : $masjidImage;
+              if ($thumb) {
+                if (\Illuminate\Support\Str::startsWith($thumb, ['http://','https://'])) {
+                  $thumbUrl = $thumb;
+                } else {
+                  $normalized = ltrim($thumb, '/');
+                  if (\Illuminate\Support\Str::startsWith($normalized, 'storage/')) {
+                    $normalized = \Illuminate\Support\Str::after($normalized, 'storage/');
+                  } elseif (!\Illuminate\Support\Str::contains($normalized, '/')) {
+                    $normalized = 'thumbnails/' . $normalized;
+                  }
+                  $disk = \Illuminate\Support\Facades\Storage::disk('public');
+                  if (!$disk->exists($normalized) && !\Illuminate\Support\Str::contains($normalized, '.')) {
+                    foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
+                      $candidate = $normalized . '.' . $ext;
+                      if ($disk->exists($candidate)) {
+                        $normalized = $candidate;
+                        break;
+                      }
+                    }
+                    if (!$disk->exists($normalized)) {
+                      $base = basename($normalized);
+                      $match = collect($disk->files('thumbnails'))
+                        ->first(fn ($f) => \Illuminate\Support\Str::startsWith(basename($f), $base . '.'));
+                      if ($match) {
+                        $normalized = $match;
+                      }
+                    }
+                  }
+                  $thumbUrl = $disk->url($normalized);
+                }
+              } else {
+                $thumbUrl = $masjidImage;
+              }
             @endphp
 
             <a href="{{ route('artikel.show', $a) }}" class="group flex gap-3 rounded-[24px] border border-white/15 bg-white/5 p-4 text-white shadow-sm transition hover:-translate-y-0.5">
@@ -587,123 +657,7 @@
 </section>
 
 
-  {{-- DONASI --}}
-  <section id="donasi" class="py-12 sm:py-16">
-    <div class="mx-auto shell max-w-7xl px-4 sm:px-6 lg:px-8 opacity-0 translate-y-6 transition duration-700 ease-out" data-animate>
-      <div class="glass rounded-[32px] p-6 sm:p-8">
-        <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">Donasi</p>
-            <h2 class="heading mt-2 text-2xl font-extrabold tracking-tight text-white">Program Donasi</h2>
-            <p class="mt-1 text-sm text-white/70">Pilih nominal cepat atau buka detail program.</p>
-          </div>
-          <a href="{{ route('donasi.index') }}" class="text-sm font-semibold text-white/90 underline decoration-white/30 underline-offset-4 hover:decoration-white">
-            Semua Donasi →
-          </a>
-        </div>
 
-        <div class="grid gap-4 lg:grid-cols-3">
-          <div class="rounded-[28px] border border-white/15 bg-white/5 p-5 text-white shadow-sm">
-            <p class="heading text-lg font-extrabold">Cepat Donasi</p>
-            <p class="mt-1 text-sm text-white/70">Pilih nominal, lalu lanjut.</p>
-
-            <div class="mt-4 grid grid-cols-3 gap-2">
-              @foreach($quickAmounts as $qa)
-                <a href="{{ route('donasi.index') }}"
-                  class="btn flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-3 py-3 text-xs font-semibold text-white hover:bg-white/10">
-                  <span class="inline-flex text-white/90">{!! $svg[$qa['icon']] !!}</span>
-                  {{ $qa['label'] }}
-                </a>
-              @endforeach
-            </div>
-
-            <a href="{{ route('donasi.index') }}"
-              class="btn mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--gold)] px-4 py-3 text-sm font-semibold text-[#13392f] shadow">
-              <span class="inline-flex">{!! $svg['card'] !!}</span>
-              Lanjut Donasi
-            </a>
-
-            <div class="mt-4 flex flex-wrap gap-2">
-              @foreach($trustBadges as $b)
-                <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/10">
-                  <span class="inline-flex text-white/90">{!! $svg[$b['icon']] !!}</span>
-                  {{ $b['label'] }}
-                </span>
-              @endforeach
-            </div>
-          </div>
-
-          <div class="lg:col-span-2">
-            <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-none md:grid md:grid-cols-2 md:overflow-visible">
-              @forelse($donasis as $d)
-                @php
-                  $target = (int) ($d->target ?? 0);
-                  $terkumpul = (int) ($d->terkumpul ?? 0);
-                  $progress = ($target > 0) ? min(100, ($terkumpul / $target) * 100) : 0;
-                  $sisa = max(0, $target - $terkumpul);
-                  $status = 'Aktif';
-                @endphp
-
-                <article class="w-[86%] flex-none rounded-[28px] border border-white/15 bg-white/5 p-5 text-white shadow-sm transition hover:-translate-y-0.5 md:w-auto">
-                  <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                      <p class="text-base font-semibold text-white inline-flex items-center gap-2">
-                        <span class="inline-flex text-white/90">{!! $svg['diamond'] !!}</span>
-                        {{ $d->judul }}
-                      </p>
-                      <p class="mt-1 text-xs text-white/65">
-                        Target <span class="font-semibold text-white">{{ $formatRupiah($target) }}</span>
-                        <span class="mx-2 text-white/20">•</span>
-                        <span class="font-semibold text-white">{{ number_format($progress, 0) }}%</span>
-                      </p>
-                    </div>
-
-                    <span class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white">
-                      <span class="h-1.5 w-1.5 rounded-full bg-[var(--gold)]"></span>
-                      {{ $status }}
-                    </span>
-                  </div>
-
-                  <div class="mt-4">
-                    <div class="h-2 w-full rounded-full bg-white/10">
-                      <div class="h-2 rounded-full bg-white transition-[width] duration-700" style="width: {{ $progress }}%"></div>
-                    </div>
-
-                    <div class="mt-3 grid grid-cols-2 gap-2 text-[11px] text-white/70">
-                      <div class="rounded-2xl border border-white/15 bg-white/5 px-3 py-2">
-                        <p class="text-white/60">Terkumpul</p>
-                        <p class="mt-0.5 text-xs font-semibold text-white">{{ $formatRupiah($terkumpul) }}</p>
-                      </div>
-                      <div class="rounded-2xl border border-white/15 bg-white/5 px-3 py-2">
-                        <p class="text-white/60">Sisa</p>
-                        <p class="mt-0.5 text-xs font-semibold text-white">{{ $formatRupiah($sisa) }}</p>
-                      </div>
-                    </div>
-
-                    <div class="mt-4 grid grid-cols-2 gap-2">
-                      <a href="{{ route('donasi.show', $d) }}"
-                        class="btn inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-[#13392f] shadow">
-                        <span class="inline-flex">{!! $svg['card'] !!}</span>
-                        Donasi
-                      </a>
-                      <a href="{{ route('donasi.show', $d) }}"
-                        class="btn inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white">
-                        <span class="inline-flex">{!! $svg['report'] !!}</span>
-                        Laporan
-                      </a>
-                    </div>
-                  </div>
-                </article>
-              @empty
-                <p class="text-sm text-white/70">Belum ada program donasi aktif.</p>
-              @endforelse
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
 
   {{-- PENGINGAT --}}
   <section class="relative py-12 sm:py-14">
@@ -828,9 +782,10 @@
           <a href="#artikel" data-close-drawer class="flex items-center justify-between rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
             <span>Artikel</span><span class="text-white/50">→</span>
           </a>
-          <a href="#donasi" data-close-drawer class="flex items-center justify-between rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
-            <span>Donasi</span><span class="text-white/50">→</span>
-          </a>
+          <a href="{{ route('public.finance') }}" data-close-drawer
+   class="flex items-center justify-between rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
+  <span>Transparansi Keuangan</span><span class="text-white/50">→</span>
+</a>
         </div>
 
         <div class="mt-4 grid grid-cols-2 gap-2">
@@ -915,7 +870,7 @@
       }
 
       // Bottom nav active section
-      const sectionIds = ['beranda','kegiatan','artikel','donasi'];
+      const sectionIds = ['beranda','kegiatan','artikel'];
       const sections = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
       const bottomItems = Array.from(document.querySelectorAll('[data-bottom-item]'));
 

@@ -10,7 +10,7 @@ class MosqueStructureController extends Controller
     {
         $root = MosqueStructureNode::with('children.children.children.children.children.children')
             ->whereNull('parent_id')
-            ->firstOrFail();
+            ->first(); // ⬅️ PENTING: JANGAN firstOrFail
 
         return view('mosque.struktur', compact('root'));
     }

@@ -377,5 +377,14 @@ class DatabaseSeeder extends Seeder
 
         // ✅ Panggil seeder Program Kerja DI SINI (bukan di dalam create())
         $this->call(\Database\Seeders\WorkProgramSeeder::class);
+
+        // ✅ Panggil seeder tambahan DI SINI
+$this->call([
+    \Database\Seeders\WorkProgramSeeder::class,
+    \Database\Seeders\ManagementMubesVI2022Seeder::class,
+]);
+$this->call(AccountSeeder::class);
+
     }
+    
 }

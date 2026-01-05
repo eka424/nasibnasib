@@ -64,7 +64,19 @@ class ArtikelController extends Controller
     {
         $data = $request->validated();
         $data['user_id'] = $request->user()->id;
-        $data['thumbnail'] = $this->storeThumbnail($request);
+
+        // thumbnail bisa dari:
+        // 1) upload file (thumbnail)
+        // 2) url google drive (thumbnail_url)
+        $data['thumbnail'] = null;
+
+        if ($request->hasFile('thumbnail')) {
+            $data['thumbnail'] = $this->storeThumbnail($request);
+        } elseif (!empty($request->input('thumbnail_url'))) {
+            $data['thumbnail'] = $this->normalizeThumbUrl($request->input('thumbnail_url'));
+        }
+
+        unset($data['thumbnail_url']);
 
         Artikel::create($data);
 
@@ -85,10 +97,26 @@ class ArtikelController extends Controller
     {
         $data = $request->validated();
 
+        $newThumb = null;
+
         if ($request->hasFile('thumbnail')) {
-            $this->deleteThumbnail($artikel->thumbnail);
-            $data['thumbnail'] = $this->storeThumbnail($request);
+            // kalau sebelumnya file local, hapus
+            $this->deleteThumbnailIfLocal($artikel->thumbnail);
+            $newThumb = $this->storeThumbnail($request);
+        } elseif (!empty($request->input('thumbnail_url'))) {
+            // kalau sebelumnya file local, hapus
+            $this->deleteThumbnailIfLocal($artikel->thumbnail);
+            $newThumb = $this->normalizeThumbUrl($request->input('thumbnail_url'));
         }
+
+        // kalau user tidak upload & tidak isi URL -> jangan ubah thumbnail
+        if ($newThumb !== null) {
+            $data['thumbnail'] = $newThumb;
+        } else {
+            unset($data['thumbnail']);
+        }
+
+        unset($data['thumbnail_url']);
 
         $artikel->update($data);
 
@@ -97,7 +125,7 @@ class ArtikelController extends Controller
 
     public function destroy(Artikel $artikel): RedirectResponse
     {
-        $this->deleteThumbnail($artikel->thumbnail);
+        $this->deleteThumbnailIfLocal($artikel->thumbnail);
         $artikel->delete();
 
         return redirect()->route('admin.artikels.index')->with('success', 'Artikel dihapus.');
@@ -110,10 +138,52 @@ class ArtikelController extends Controller
             : null;
     }
 
-    protected function deleteThumbnail(?string $path): void
+    protected function deleteThumbnailIfLocal(?string $path): void
     {
-        if ($path) {
-            Storage::disk('public')->delete($path);
+        if (!$path) return;
+
+        if ($this->isExternalUrl($path)) {
+            return; // jangan hapus kalau URL
         }
+
+        $path = ltrim($path, '/');
+        if (str_starts_with($path, 'storage/')) {
+            $path = substr($path, strlen('storage/'));
+        }
+
+        Storage::disk('public')->delete($path);
+    }
+
+    protected function isExternalUrl(string $value): bool
+    {
+        return preg_match('~^https?://~i', $value) === 1;
+    }
+
+    /**
+     * Normalize URL thumbnail (support Google Drive)
+     */
+    protected function normalizeThumbUrl(string $url): string
+    {
+        $url = trim($url);
+
+        // /file/d/ID/
+        if (preg_match('~drive\.google\.com/file/d/([^/]+)~', $url, $m)) {
+            $id = $m[1];
+            return "https://drive.google.com/thumbnail?id={$id}&sz=w2000";
+        }
+
+        // uc?id=ID atau open?id=ID atau uc?export=view&id=ID
+        if (preg_match('~drive\.google\.com/(?:uc|open)\?.*id=([^&]+)~', $url, $m)) {
+            $id = $m[1];
+            return "https://drive.google.com/thumbnail?id={$id}&sz=w2000";
+        }
+
+        // paste ID doang
+        if (preg_match('~^[a-zA-Z0-9_-]{10,}$~', $url)) {
+            return "https://drive.google.com/thumbnail?id={$url}&sz=w2000";
+        }
+
+        // selain drive, biarkan apa adanya
+        return $url;
     }
 }

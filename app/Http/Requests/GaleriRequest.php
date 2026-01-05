@@ -19,13 +19,10 @@ class GaleriRequest extends FormRequest
             'judul' => ['required', 'string', 'max:255'],
             'deskripsi' => ['nullable', 'string'],
 
-            // file upload opsional, tapi wajib salah satu: attachment atau url_file
-            'attachment' => ['nullable', 'file', 'max:8192', 'mimetypes:image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime'],
-            'url_file' => ['nullable', 'string', 'max:255'],
+            // kita pakai URL saja (Drive/Youtube/link mp4)
+            'url_file' => ['required', 'url', 'max:2000'],
 
             'tipe' => ['required', Rule::in(['image', 'video'])],
-
-            // dropdown baru
             'kategori' => ['required', Rule::in(['idarah', 'imarah', 'riayah'])],
             'seksi' => ['nullable', 'string', 'max:255'],
         ];
@@ -34,12 +31,36 @@ class GaleriRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator) {
-            if (! $this->hasFile('attachment') && ! $this->filled('url_file')) {
-                $validator->errors()->add('url_file', 'Unggah file atau isi URL galeri.');
+            if (! $this->filled('url_file')) {
+                $validator->errors()->add('url_file', 'Link wajib diisi.');
+                return;
             }
 
-            // Kalau tipe video tapi upload image (atau sebaliknya) bisa kamu ketatkan di sini.
-            // Untuk sekarang cukup mimetype list di atas + pilihan tipe.
+            $url = (string) $this->input('url_file');
+
+            // Validasi tambahan ringan sesuai tipe
+            $tipe = (string) $this->input('tipe');
+
+            if ($tipe === 'image') {
+                // boleh drive / direct image
+                // kalau bukan drive, minimal harus mengandung ekstensi image umum (opsional ketat)
+                // NOTE: kalau kamu sering pakai link tanpa ekstensi, hapus blok ini.
+                $isDrive = str_contains($url, 'drive.google.com');
+                $looksImage = preg_match('/\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i', $url);
+
+                if (! $isDrive && ! $looksImage) {
+                    $validator->errors()->add('url_file', 'Untuk tipe image, gunakan link Google Drive atau link gambar (jpg/png/webp/gif).');
+                }
+            }
+
+            if ($tipe === 'video') {
+                $isYoutube = str_contains($url, 'youtube.com') || str_contains($url, 'youtu.be');
+                $looksMp4  = preg_match('/\.(mp4|webm)(\?.*)?$/i', $url);
+
+                if (! $isYoutube && ! $looksMp4 && ! str_contains($url, 'drive.google.com')) {
+                    $validator->errors()->add('url_file', 'Untuk tipe video, gunakan link YouTube, link mp4/webm, atau link Google Drive.');
+                }
+            }
         });
     }
 }

@@ -15,7 +15,6 @@
             ['label' => 'Dashboard', 'route' => 'admin.dashboard'],
             ['label' => 'Users', 'route' => 'admin.users.index'],
             ['label' => 'Profil Masjid', 'route' => 'admin.profil.edit'],
-            ['label' => 'Edit Profil Masjid', 'route' => 'admin.mosque_profile.edit'],
             ['label' => 'Struktur Masjid', 'route' => 'admin.mosque_structure.index'],
 
             ['label' => 'Kelola Proker', 'route' => 'admin.work_program.all'],

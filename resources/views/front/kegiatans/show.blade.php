@@ -9,9 +9,13 @@
 
   // ========= Poster =========
   $poster = $kegiatan->poster ?? null;
-  if ($poster && ! str_starts_with($poster, 'http')) {
-    $poster = Storage::url($poster);
+
+  // kalau ada path storage lokal
+  if ($poster && !str_starts_with($poster, 'http')) {
+    $poster = \Illuminate\Support\Facades\Storage::url($poster);
   }
+
+  // fallback kalau kosong
   $poster = $poster ?: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=2000&q=80';
 
   // ========= Labels =========
@@ -29,7 +33,7 @@
   };
 
   $status = 'Terbuka';
-  if (! empty($kegiatan->tanggal_selesai) && $kegiatan->tanggal_selesai->isPast()) {
+  if (!empty($kegiatan->tanggal_selesai) && $kegiatan->tanggal_selesai->isPast()) {
     $status = 'Selesai';
   }
 
@@ -58,13 +62,12 @@
     $gcalLink = null;
   }
 
-  // ========= Icons (simple outline, flaticon-like) =========
+  // ========= Icons =========
   $ico = [
     'badge' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z"/></svg>',
     'home' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>',
     'list' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>',
     'calendar' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3M16 3v3"/><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>',
-    'clock' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
     'pin' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.2"/></svg>',
     'money' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01"/><path d="M17 14h.01"/><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>',
     'check' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
@@ -75,9 +78,9 @@
 @endphp
 
 <style>
-  :root{ --bg: {{ $bg }}; --accent: {{ $accent }}; --primary: {{ $primary }}; }
-  svg{ stroke: currentColor; }
-  svg *{ vector-effect: non-scaling-stroke; }
+  :root { --bg: {{ $bg }}; --accent: {{ $accent }}; --primary: {{ $primary }}; }
+  svg { stroke: currentColor; }
+  svg * { vector-effect: non-scaling-stroke; }
 </style>
 
 <div class="min-h-screen text-white" style="background: var(--bg);">
@@ -110,7 +113,7 @@
     </div>
 
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
-      
+
       {{-- Breadcrumb --}}
       <nav class="text-xs text-white/70">
         <ol class="flex flex-wrap items-center gap-2">
@@ -130,37 +133,29 @@
         </ol>
       </nav>
 
-{{-- FLASH: notif setelah daftar --}}
-@if (session('kegiatan_flash'))
-  @php
-    $flash = session('kegiatan_flash');
-    $flashType = $flash['type'] ?? 'success';
-    $flashMsg = $flash['message'] ?? '';
-    $flashGcal = $flash['gcal'] ?? null;
-  @endphp
+      {{-- FLASH --}}
+      @if (session('kegiatan_flash'))
+        @php
+          $flash = session('kegiatan_flash');
+          $flashMsg = $flash['message'] ?? '';
+          $flashGcal = $flash['gcal'] ?? null;
+        @endphp
 
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="mt-4 rounded-2xl border border-white/14 bg-white/10 p-4 text-white shadow-[0_18px_60px_-45px_rgba(0,0,0,0.35)] backdrop-blur">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="text-sm font-semibold">
-          {!! $ico['check'] !!} <span class="ml-1">{{ $flashMsg }}</span>
+        <div class="mt-4 rounded-2xl border border-white/14 bg-white/10 p-4 text-white shadow-[0_18px_60px_-45px_rgba(0,0,0,0.35)] backdrop-blur">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="text-sm font-semibold">
+              {!! $ico['check'] !!} <span class="ml-1">{{ $flashMsg }}</span>
+            </div>
+
+            @if($flashGcal)
+              <a href="{{ $flashGcal }}" target="_blank" rel="noreferrer"
+                class="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/6 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10">
+                {!! $ico['calendar'] !!} Tambah ke Google Calendar
+              </a>
+            @endif
+          </div>
         </div>
-
-        <div class="flex gap-2">
-          @if($flashGcal)
-            <a href="{{ $flashGcal }}" target="_blank" rel="noreferrer"
-               class="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/6 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10">
-              {!! $ico['calendar'] !!} Tambah ke Google Calendar
-            </a>
-          @endif
-
-
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-@endif
+      @endif
 
       {{-- Chips --}}
       <div class="mt-4 flex flex-wrap items-center gap-2">
@@ -226,8 +221,22 @@
     </div>
   </section>
 
+  {{-- POSTER (rapi + konsisten) --}}
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-6">
+    <div class="overflow-hidden rounded-[28px] border border-white/12 bg-white/5 shadow-[0_18px_60px_-45px_rgba(0,0,0,0.35)]">
+      <div class="aspect-[16/7] w-full">
+        <img
+          src="{{ $poster }}"
+          alt="Poster {{ $kegiatan->nama_kegiatan }}"
+          class="h-full w-full object-cover"
+          referrerpolicy="no-referrer"
+        >
+      </div>
+    </div>
+  </section>
+
   {{-- CONTENT --}}
-  <main class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
+  <main class="mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-6 lg:px-8">
     <div class="grid gap-6 lg:grid-cols-12">
 
       {{-- LEFT --}}
@@ -344,6 +353,7 @@
 
         </div>
       </aside>
+
     </div>
   </main>
 
@@ -385,7 +395,7 @@
     </div>
   </div>
 
-  {{-- Scripts (copy link safe for multiple buttons) --}}
+  {{-- Scripts --}}
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const buttons = document.querySelectorAll('[data-copy-link]');

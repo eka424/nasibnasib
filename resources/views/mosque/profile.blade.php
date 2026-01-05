@@ -15,6 +15,19 @@
                 <p class="text-[#DAF0DC]/80 mt-2">
                     {{ $profile->kategori ? $profile->kategori.' • ' : '' }} {{ $profile->tipe ?? 'Masjid' }}
                 </p>
+                <div class="mt-4 flex gap-3 flex-wrap">
+    <a href="{{ route('mosque.struktur') }}"
+       class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 hover:bg-white/15 text-sm font-semibold">
+        Struktur Organisasi →
+    </a>
+
+    <a href="{{ route('mosque.work_program') }}"
+       class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 hover:bg-white/15 text-sm font-semibold">
+        Program Kerja →
+    </a>
+
+</div>
+
             </div>
 
             <div class="flex gap-2 flex-wrap">
@@ -122,11 +135,27 @@
                     <div class="rounded-3xl bg-white/10 border border-white/10 backdrop-blur p-6">
                         <h2 class="text-xl font-bold mb-3">Misi</h2>
                         <ol class="list-decimal pl-5 space-y-2 text-[#DAF0DC]/90">
-                            @forelse(($profile->misi ?? []) as $item)
-                                <li class="leading-relaxed">{{ $item }}</li>
-                            @empty
-                                <li>Belum ada misi.</li>
-                            @endforelse
+                            @php
+    $misi = $profile->misi ?? [];
+
+    // Kalau ternyata misi itu string (teks), coba ubah jadi array dari JSON
+    if (is_string($misi)) {
+        $misi = json_decode($misi, true) ?? [];
+    }
+
+    // Kalau masih bukan array (misal null), paksa jadi array kosong
+    if (!is_array($misi)) {
+        $misi = [];
+    }
+@endphp
+
+<ol class="list-decimal pl-5 space-y-2 text-[#DAF0DC]/90">
+    @forelse($misi as $item)
+        <li class="leading-relaxed">{{ $item }}</li>
+    @empty
+        <li>Belum ada misi.</li>
+    @endforelse
+</ol>
                         </ol>
                     </div>
                 </div>
@@ -183,14 +212,6 @@
                 </div>
             </div>
 
-<a href="{{ route('mosque.struktur') }}"
-   class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 hover:bg-white/15 text-sm font-semibold">
-   Struktur Organisasi →
-</a>
-
-<a href="{{ route('mosque.work_program') }}" class="btn btn-outline-light">
-  Program Kerja →
-</a>
 
                 <div class="rounded-3xl bg-white/10 border border-white/10 backdrop-blur p-6">
                     <h3 class="text-lg font-bold">Ingin bantu memakmurkan masjid?</h3>
@@ -198,12 +219,7 @@
                         Kamu bisa ikut kegiatan, berdonasi, atau kontribusi program sosial.
                     </p>
 
-                    <div class="mt-4">
-                        <a href="#"
-                           class="w-full inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold bg-[#F6B443] text-emerald-900 hover:opacity-90">
-                            Mulai Donasi 💛
-                        </a>
-                    </div>
+                
                 </div>
             </div>
         </div>

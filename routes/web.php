@@ -34,7 +34,6 @@ use App\Http\Controllers\Ustadz\PertanyaanController as UstadzPertanyaanControll
 use App\Http\Controllers\Webhook\XenditWebhookController;
 
 use App\Http\Controllers\MosqueProfileController;
-use App\Http\Controllers\Admin\MosqueProfileAdminController;
 use App\Http\Controllers\MosqueStructureController;
 use App\Http\Controllers\Admin\MosqueStructureAdminController;
 use App\Http\Controllers\MosqueWorkProgramController;
@@ -49,6 +48,17 @@ use App\Http\Controllers\Admin\KidsContentController;
 use App\Http\Controllers\SedekahMasjidController;
 use App\Http\Controllers\MidtransWebhookController;
 use App\Http\Controllers\Admin\SedekahAdminController;
+use App\Http\Controllers\Frontend\StructureController;
+
+use App\Http\Controllers\Admin\ManagementTermController;
+use App\Http\Controllers\Admin\ManagementBuilderController;
+
+use App\Http\Controllers\Admin\ManagementCrudController;
+
+use App\Http\Controllers\PublicFinanceController;
+use App\Http\Controllers\Admin\TransactionController;
+use App\Http\Controllers\Admin\YearBalanceController;
+
 /*
 |--------------------------------------------------------------------------
 | FRONT
@@ -59,13 +69,35 @@ Route::get('/', [ArtikelFrontController::class, 'home'])->name('home');
 Route::get('/artikel', [ArtikelFrontController::class, 'index'])->name('artikel.index');
 Route::get('/artikel/{artikel:slug}', [ArtikelFrontController::class, 'show'])->name('artikel.show');
 
-Route::get('/kegiatan', [KegiatanFrontController::class, 'index'])->name('kegiatan.index');
-Route::get('/kegiatan/{kegiatan}', [KegiatanFrontController::class, 'show'])->name('kegiatan.show');
-
-Route::get('/donasi', [DonasiFrontController::class, 'index'])->name('donasi.index');
-Route::get('/donasi/{donasi}', [DonasiFrontController::class, 'show'])->name('donasi.show');
-
+// ===============================
+// GALERI (FRONT / JAMAAH)
+// ===============================
 Route::get('/galeri', [GaleriFrontController::class, 'index'])->name('galeri.index');
+Route::get('/galeri/{galeri}', [GaleriFrontController::class, 'show'])->name('galeri.show');
+
+
+// ===============================
+// KEGIATAN
+// ===============================
+Route::get('/kegiatan', [KegiatanFrontController::class, 'index'])->name('kegiatan.index');
+
+// publik
+Route::get('/kegiatan/kalender', [KegiatanFrontController::class, 'calendar'])
+    ->name('kegiatan.calendar');
+
+// user area (auth)
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/kegiatan/riwayat', [KegiatanFrontController::class, 'riwayat'])
+        ->name('kegiatan.riwayat');
+
+    Route::post('/kegiatan/{kegiatan}/daftar', [KegiatanFrontController::class, 'daftar'])
+        ->name('kegiatan.daftar');
+});
+
+// dinamis (PALING BAWAH)
+Route::get('/kegiatan/{kegiatan}', [KegiatanFrontController::class, 'show'])
+    ->name('kegiatan.show');
+
 /*
 |-------------------------------------------------------------------------- 
 | PERPUSTAKAAN (GABUNGAN + RAMAH ANAK + HADITS)
@@ -157,8 +189,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('dashboard');
     })->name('dashboard');
 
-    Route::post('/kegiatan/{kegiatan}/daftar', [KegiatanFrontController::class, 'daftar'])->name('kegiatan.daftar');
-    Route::get('/kegiatan/riwayat', [KegiatanFrontController::class, 'riwayat'])->name('kegiatan.riwayat');
+    
+   
 
     Route::post('/donasi/{donasi}/transaksi', [DonasiFrontController::class, 'donate'])->name('donasi.transaksi');
     Route::get('/donasi/riwayat', [DonasiFrontController::class, 'riwayat'])->name('donasi.riwayat');
@@ -169,6 +201,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
 });
 
 /*
@@ -261,23 +294,8 @@ Route::prefix('pengurus')
 Route::get('/profil-masjid', [MosqueProfileController::class, 'show'])->name('mosque.profile');
 Route::get('/profil-masjid/sejarah', [MosqueProfileController::class, 'sejarah'])->name('mosque.sejarah');
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN EDIT PROFIL MASJID
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/profil-masjid/edit', [MosqueProfileAdminController::class, 'edit'])->name('mosque_profile.edit');
-    Route::put('/profil-masjid', [MosqueProfileAdminController::class, 'update'])->name('mosque_profile.update');
-});
 
-/*
-|--------------------------------------------------------------------------
-| STRUKTUR MASJID
-|--------------------------------------------------------------------------
-*/
 // publik
-Route::get('/profil-masjid/struktur', [MosqueStructureController::class, 'index'])->name('mosque.struktur');
 
 // admin (pakai middleware admin yang sudah kamu punya)
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
@@ -338,4 +356,79 @@ Route::middleware(['auth','admin'])->prefix('admin')->group(function () {
   Route::post('/sedekah/campaigns', [SedekahAdminController::class, 'campaignStore'])->name('admin.sedekah.campaigns.store');
   Route::put('/sedekah/campaigns/{campaign}', [SedekahAdminController::class, 'campaignUpdate'])->name('admin.sedekah.campaigns.update');
 });
+Route::get('/profil-masjid/struktur', [MosqueStructureController::class, 'index'])->name('mosque.struktur');
+
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
+
+
+
+    // aksi cepat
+    Route::post('/struktur/{term}/set-active', [ManagementTermController::class, 'setActive'])->name('admin.struktur.setActive');
+    Route::post('/struktur/{term}/publish', [ManagementTermController::class, 'publish'])->name('admin.struktur.publish');
+});
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware(['auth', 'verified'])
+    ->group(function () {
+
+        Route::middleware(['role:admin|pengurus'])->group(function () {
+
+            // ===============================
+            // STRUKTUR PENGURUS
+            // ===============================
+            Route::get('/struktur', [ManagementTermController::class, 'index'])
+                ->name('struktur.index');
+
+            Route::get('/struktur/create', [ManagementTermController::class, 'create'])
+                ->name('struktur.create');
+
+            Route::post('/struktur', [ManagementTermController::class, 'store'])
+                ->name('struktur.store');
+
+            Route::get('/struktur/{term}/edit', [ManagementTermController::class, 'edit'])
+                ->name('struktur.edit');
+
+            Route::put('/struktur/{term}', [ManagementTermController::class, 'update'])
+                ->name('struktur.update');
+
+            // ✅ INI YANG TADI HILANG
+            Route::get('/struktur/{term}/builder', [ManagementBuilderController::class, 'builder'])
+                ->name('struktur.builder');
+
+            // aksi cepat
+            Route::post('/struktur/{term}/set-active', [ManagementTermController::class, 'setActive'])
+                ->name('struktur.setActive');
+
+            Route::post('/struktur/{term}/publish', [ManagementTermController::class, 'publish'])
+                ->name('struktur.publish');
+
+            // CRUD ajax
+            Route::post('/units', [ManagementCrudController::class, 'storeUnit'])
+                ->name('units.store');
+
+            Route::post('/positions', [ManagementCrudController::class, 'storePosition'])
+                ->name('positions.store');
+
+            Route::post('/members', [ManagementCrudController::class, 'storeMember'])
+                ->name('members.store');
+        });
+        Route::get('/profil-masjid/struktur', [MosqueStructureController::class, 'index'])
+    ->name('mosque.struktur');
+
+    });
+
+// ===== PUBLIK KEUANGAN =====
+Route::get('/keuangan', [PublicFinanceController::class, 'index'])->name('public.finance');
+Route::get('/keuangan/bukti/{transaction}', [PublicFinanceController::class, 'receipt'])->name('public.finance.receipt');
+Route::get('/keuangan/rekap-tahunan', [PublicFinanceController::class, 'yearly'])->name('public.finance.yearly');
+
+// ===== ADMIN KEUANGAN =====
+Route::middleware(['auth'])->prefix('admin/keuangan')->name('admin.finance.')->group(function () {
+    Route::resource('transaksi', TransactionController::class)->except(['show']);
+
+    // Saldo Awal / Sisa Kas per Tahun
+    Route::get('/saldo-awal', [YearBalanceController::class, 'index'])->name('year-balance.index');
+    Route::post('/saldo-awal', [YearBalanceController::class, 'store'])->name('year-balance.store');
+});
+
 require __DIR__.'/auth.php';

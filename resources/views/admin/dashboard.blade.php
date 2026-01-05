@@ -9,13 +9,47 @@
 <div class="min-h-screen bg-slate-100">
   <div class="mx-auto max-w-7xl px-4 py-6 md:px-6">
 
-    <div class="flex items-end justify-between">
+    {{-- HEADER --}}
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <h1 class="text-xl font-bold text-slate-900">Dashboard Admin</h1>
         <p class="text-sm text-slate-500">Ringkasan donasi, pendaftaran, kegiatan, dan tanya ustadz.</p>
       </div>
 
-      <div class="flex gap-2">
+      <div class="flex flex-wrap gap-2">
+        {{-- Kelola Keuangan --}}
+        @if (\Illuminate\Support\Facades\Route::has('admin.finance.transaksi.index'))
+          <a href="{{ route('admin.finance.transaksi.index') }}"
+             class="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600">
+            {{-- icon --}}
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Kelola Keuangan
+          </a>
+        @endif
+
+        {{-- Input Sisa Kas --}}
+        @if (\Illuminate\Support\Facades\Route::has('admin.finance.year-balance.index'))
+          <a href="{{ route('admin.finance.year-balance.index') }}"
+             class="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Input Sisa Kas
+          </a>
+        @endif
+
+        {{-- Tombol Struktur Pengurus --}}
+        @if (\Illuminate\Support\Facades\Route::has('admin.struktur.index'))
+          <a href="{{ route('admin.struktur.index') }}"
+             class="inline-flex items-center rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">
+            Struktur Pengurus
+          </a>
+        @endif
+
+        {{-- Tombol Sedekah Masjid --}}
         @if (\Illuminate\Support\Facades\Route::has('admin.sedekah.dashboard'))
           <a href="{{ route('admin.sedekah.dashboard') }}"
              class="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">

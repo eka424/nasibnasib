@@ -112,7 +112,44 @@
       {{-- CONTENT --}}
       <div class="lg:col-span-8">
         <article class="overflow-hidden rounded-[28px] border border-white/12 bg-white text-slate-900 shadow-[0_18px_60px_-45px_rgba(0,0,0,0.45)]">
-          <img  src="{{ asset('images/rtb.png') }}" alt="{{ $title }}"
+          @php
+            $artikelData = $artikel ?? $artikelDetail ?? $post ?? null;
+            $thumb = $artikelData->thumbnail ?? null;
+            if ($thumb) {
+              if (\Illuminate\Support\Str::startsWith($thumb, ['http://','https://'])) {
+                $thumbUrl = $thumb;
+              } else {
+                $normalized = ltrim($thumb, '/');
+                if (\Illuminate\Support\Str::startsWith($normalized, 'storage/')) {
+                  $normalized = \Illuminate\Support\Str::after($normalized, 'storage/');
+                } elseif (!\Illuminate\Support\Str::contains($normalized, '/')) {
+                  $normalized = 'thumbnails/' . $normalized;
+                }
+                $disk = \Illuminate\Support\Facades\Storage::disk('public');
+                if (!$disk->exists($normalized) && !\Illuminate\Support\Str::contains($normalized, '.')) {
+                  foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
+                    $candidate = $normalized . '.' . $ext;
+                    if ($disk->exists($candidate)) {
+                      $normalized = $candidate;
+                      break;
+                    }
+                  }
+                  if (!$disk->exists($normalized)) {
+                    $base = basename($normalized);
+                    $match = collect($disk->files('thumbnails'))
+                      ->first(fn ($f) => \Illuminate\Support\Str::startsWith(basename($f), $base . '.'));
+                    if ($match) {
+                      $normalized = $match;
+                    }
+                  }
+                }
+                $thumbUrl = $disk->url($normalized);
+              }
+            } else {
+              $thumbUrl = 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1600&q=80';
+            }
+          @endphp
+          <img src="{{ $thumbUrl }}" alt="{{ $title }}"
             class="h-56 w-full object-cover sm:h-72"
             referrerpolicy="no-referrer"
             loading="lazy"

@@ -16,15 +16,7 @@
                             </svg>
                             Refresh
                         </a>
-                        <button type="button"
-                            class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 10l5 5 5-5" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v11" />
-                            </svg>
-                            Export
-                        </button>
+                    
                         <a href="{{ route('admin.artikels.create') }}"
                             class="inline-flex items-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

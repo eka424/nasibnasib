@@ -1,33 +1,104 @@
 <x-front-layout>
 @php
   // ===== Data normalization =====
-  $judul   = $perpustakaan->judul ?? 'Ebook Masjid';
-  $penulis = $perpustakaan->penulis ?? null;
+  $judul    = $perpustakaan->judul ?? 'Ebook Masjid';
+  $penulis  = $perpustakaan->penulis ?? null;
   $kategori = $perpustakaan->kategori ?? optional($perpustakaan->category)->name ?? null;
-  $tahun   = $perpustakaan->publish_year ?? $perpustakaan->tahun ?? null;
-  $halaman = $perpustakaan->pages ?? $perpustakaan->halaman ?? null;
+  $tahun    = $perpustakaan->publish_year ?? $perpustakaan->tahun ?? null;
+  $halaman  = $perpustakaan->pages ?? $perpustakaan->halaman ?? null;
 
-  $cover = $perpustakaan->cover ?? $perpustakaan->thumbnail ?? $perpustakaan->gambar ?? null;
-  if ($cover && ! str_starts_with($cover, 'http')) $cover = Storage::url($cover);
+  // ===== Helpers: extract drive id + normalize url =====
+  $extractDriveId = function (?string $url): ?string {
+    $url = trim((string) $url);
+    if ($url === '') return null;
 
-  $file = $perpustakaan->file_ebook ?? null;
-  $fileUrl = $file ? (str_starts_with($file, 'http') ? $file : Storage::url($file)) : null;
+    if (preg_match('~drive\.google\.com/file/d/([^/]+)~', $url, $m)) return $m[1];
+    if (preg_match('~drive\.google\.com/open\?id=([^&]+)~', $url, $m)) return $m[1];
+    if (str_contains($url, 'drive.google.com') && preg_match('~[?&]id=([^&]+)~', $url, $m)) return $m[1];
+
+    return null;
+  };
+
+  $normalizeDriveThumb = function (?string $url) use ($extractDriveId): ?string {
+    $url = trim((string) $url);
+    if ($url === '') return null;
+
+    // sudah thumbnail
+    if (str_contains($url, 'drive.google.com/thumbnail')) return $url;
+
+    $id = $extractDriveId($url);
+    if ($id) {
+      // opsi 1 (paling sering aman)
+      return "https://drive.google.com/thumbnail?id={$id}&sz=w1200";
+      // opsi 2 kalau mau coba ganti:
+      // return "https://lh3.googleusercontent.com/d/{$id}=s1200";
+    }
+
+    return $url;
+  };
+
+  $normalizeDrivePdfPreview = function (?string $url) use ($extractDriveId): ?string {
+    $url = trim((string) $url);
+    if ($url === '') return null;
+
+    if (str_contains($url, 'drive.google.com') && str_contains($url, '/preview')) return $url;
+
+    $id = $extractDriveId($url);
+    if ($id) return "https://drive.google.com/file/d/{$id}/preview";
+
+    return $url;
+  };
+
+  $normalizeDriveDownload = function (?string $url) use ($extractDriveId): ?string {
+    $url = trim((string) $url);
+    if ($url === '') return null;
+
+    $id = $extractDriveId($url);
+    if ($id) return "https://drive.google.com/uc?export=download&id={$id}";
+
+    return $url;
+  };
+
+  // ---- Cover URL (local vs http, + Drive normalize) ----
+  $coverRaw = $perpustakaan->cover ?? $perpustakaan->thumbnail ?? $perpustakaan->gambar ?? null;
+
+  if ($coverRaw && !str_starts_with($coverRaw, 'http')) {
+    $coverUrl = Storage::url($coverRaw);
+  } else {
+    $coverUrl = $normalizeDriveThumb($coverRaw);
+  }
+
+  // ---- File URL (local vs http, + Drive PDF preview) ----
+  $fileRaw = $perpustakaan->file_ebook ?? null;
+
+  if ($fileRaw && !str_starts_with($fileRaw, 'http')) {
+    $fileUrl = Storage::url($fileRaw);
+  } else {
+    $fileUrl = $normalizeDrivePdfPreview($fileRaw);
+  }
 
   $desc = $perpustakaan->deskripsi ?? '';
 
   $viewCount     = (int) ($perpustakaan->view_count ?? 0);
   $downloadCount = (int) ($perpustakaan->download_count ?? 0);
 
-  $isPdf = $fileUrl ? str_ends_with(strtolower(parse_url($fileUrl, PHP_URL_PATH) ?? ''), '.pdf') : false;
+  // ===== PDF detection =====
+  $isPdf = (bool) ($fileUrl && (
+      str_contains(strtolower($fileUrl), '.pdf')
+      || str_contains($fileUrl, '/preview')
+      || str_contains($fileUrl, 'drive.google.com/file/d/')
+  ));
 
-  // ===== Theme (match front) =====
+  // ===== Download url =====
+  $downloadUrl = $normalizeDriveDownload($fileUrl) ?? $fileUrl;
+
+  // ===== Theme =====
   $bg = '#13392f';
   $accent = '#E7B14B';
   $primary = '#0F4A3A';
-
   $glass = 'rounded-[28px] border border-white/14 bg-white/8 shadow-[0_18px_60px_-45px_rgba(0,0,0,0.55)] backdrop-blur';
 
-  // ===== Icons (simple outline / flaticon-like) =====
+  // ===== Icons =====
   $ico = [
     'home' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>',
     'library' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19a2 2 0 0 0 2 2h14"/><path d="M6 3h14v18H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>',
@@ -46,7 +117,6 @@
 <style>
   :root { --bg: {{ $bg }}; --accent: {{ $accent }}; --primary: {{ $primary }}; }
   .line-clamp-2{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;}
-  .line-clamp-3{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;}
   svg{ stroke: currentColor; }
   svg *{ vector-effect: non-scaling-stroke; }
 </style>
@@ -93,10 +163,6 @@
           </span>
         @endif
 
-        <span class="inline-flex items-center gap-2 rounded-full border border-white/14 bg-white/8 px-3 py-1 text-xs font-semibold text-white/90">
-          {!! $ico['book'] !!} Koleksi Digital
-        </span>
-
         @if($fileUrl)
           <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-extrabold text-[#13392f]" style="background: var(--accent);">
             {{ $isPdf ? 'PDF' : 'FILE' }}
@@ -123,25 +189,28 @@
       {{-- LEFT --}}
       <section class="lg:col-span-8 space-y-6">
 
-        {{-- MAIN CARD --}}
         <div class="overflow-hidden rounded-[28px] border border-white/12 bg-white/95 text-slate-900 shadow-[0_18px_60px_-45px_rgba(0,0,0,0.35)]">
-          <div class="grid gap-0 sm:grid-cols-[220px_1fr]">
 
-            {{-- Cover --}}
+          {{-- TOP: cover + meta --}}
+          <div class="grid gap-0 sm:grid-cols-[220px_1fr]">
             <div class="relative">
-              @if($cover)
-                <img src="{{ $cover }}" alt="{{ $judul }}"
-                     class="h-64 w-full object-cover sm:h-full sm:min-h-[320px]"
-                     loading="lazy" referrerpolicy="no-referrer"/>
+              @if($coverUrl)
+                <img
+                  src="{{ $coverUrl }}"
+                  alt="{{ $judul }}"
+                  class="h-64 w-full object-cover sm:h-full sm:min-h-[320px]"
+                  loading="lazy"
+                  referrerpolicy="no-referrer"
+                />
               @else
                 <div class="grid h-64 w-full place-items-center bg-gradient-to-br from-emerald-100 to-emerald-200 sm:h-full sm:min-h-[320px]">
                   <span class="text-5xl">📚</span>
                 </div>
               @endif
+
               <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent"></div>
             </div>
 
-            {{-- Meta --}}
             <div class="p-5 sm:p-7">
               <div class="flex flex-wrap gap-2">
                 <div class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
@@ -176,7 +245,7 @@
 
               {{-- Desktop actions --}}
               <div class="mt-6 hidden flex-wrap gap-2 sm:flex">
-                <a href="{{ $fileUrl ?: '#' }}" target="_blank" rel="noreferrer"
+                <a href="{{ $downloadUrl ?: '#' }}" target="_blank" rel="noreferrer"
                    class="{{ $fileUrl ? 'text-[#13392f]' : 'cursor-not-allowed bg-slate-200 text-slate-500' }}
                           inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-extrabold shadow-sm transition hover:brightness-105"
                    style="{{ $fileUrl ? 'background: var(--accent);' : '' }}">
@@ -198,26 +267,39 @@
             </div>
           </div>
 
-          {{-- Preview --}}
+          {{-- PREVIEW --}}
           <div class="border-t border-slate-200 p-5 sm:p-7">
             <div class="flex items-end justify-between gap-3">
               <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700">Preview</p>
                 <p class="mt-1 text-sm text-slate-600">
-                  Preview tampil otomatis jika file PDF.
+                  Preview tampil otomatis jika file PDF (Google Drive / link PDF).
                 </p>
               </div>
             </div>
 
             <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
               @if($fileUrl && $isPdf)
-                <iframe title="Preview PDF" src="{{ $fileUrl }}" class="h-[70vh] w-full"></iframe>
+                <iframe
+                  title="Preview PDF"
+                  src="{{ $fileUrl }}"
+                  class="h-[70vh] w-full"
+                  loading="lazy"
+                  referrerpolicy="no-referrer"
+                ></iframe>
               @else
                 <div class="p-6 text-sm text-slate-600">
                   Preview tersedia untuk PDF. Silakan klik <span class="font-semibold text-slate-800">Baca Online</span> untuk membuka file.
                 </div>
               @endif
             </div>
+
+            @if($fileUrl)
+              <a href="{{ $fileUrl }}" target="_blank" rel="noreferrer"
+                 class="mt-3 inline-block text-sm font-semibold text-emerald-700 hover:underline">
+                Buka di tab baru →
+              </a>
+            @endif
           </div>
         </div>
       </section>
@@ -231,7 +313,7 @@
             <p class="mt-1 text-xs text-white/70">Unduh atau simpan link untuk dibaca nanti.</p>
 
             <div class="mt-4 grid gap-2">
-              <a href="{{ $fileUrl ?: '#' }}" target="_blank" rel="noreferrer"
+              <a href="{{ $downloadUrl ?: '#' }}" target="_blank" rel="noreferrer"
                  class="{{ $fileUrl ? 'text-[#13392f]' : 'cursor-not-allowed bg-white/20 text-white/50' }}
                         inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-extrabold shadow-sm transition hover:brightness-105"
                  style="{{ $fileUrl ? 'background: var(--accent);' : '' }}">
@@ -270,7 +352,7 @@
   <div class="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-slate-950/75 p-3 backdrop-blur lg:hidden">
     <div class="mx-auto max-w-6xl px-1">
       <div class="grid grid-cols-2 gap-2">
-        <a href="{{ $fileUrl ?: '#' }}" target="_blank" rel="noreferrer"
+        <a href="{{ $downloadUrl ?: '#' }}" target="_blank" rel="noreferrer"
            class="{{ $fileUrl ? 'text-[#13392f]' : 'cursor-not-allowed bg-white/20 text-white/50' }}
                   w-full rounded-2xl px-4 py-3 text-center text-sm font-extrabold transition hover:brightness-105"
            style="{{ $fileUrl ? 'background: var(--accent);' : '' }}">
@@ -285,7 +367,7 @@
     </div>
   </div>
 
-  {{-- Copy link + toast --}}
+  {{-- Copy link toast --}}
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const toast = (text) => {

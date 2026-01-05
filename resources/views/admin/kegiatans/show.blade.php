@@ -8,6 +8,10 @@
             @endif
         </p>
         <p class="text-sm text-gray-600">{{ $kegiatan->lokasi }}</p>
+        @if($kegiatan->poster)
+  <img src="{{ $kegiatan->poster }}" class="w-full max-h-80 object-cover rounded-lg" alt="Poster">
+@endif
+
         <div class="prose max-w-none">
             {!! nl2br(e($kegiatan->deskripsi)) !!}
         </div>

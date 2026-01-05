@@ -32,6 +32,58 @@
 
   $glass = 'rounded-[28px] border border-white/14 bg-white/8 shadow-[0_18px_60px_-45px_rgba(0,0,0,0.55)] backdrop-blur';
 
+  // ===== Helpers: Drive normalize (cover + pdf preview + download) =====
+  $extractDriveId = function (?string $url): ?string {
+    $url = trim((string) $url);
+    if ($url === '') return null;
+
+    if (preg_match('~drive\.google\.com/file/d/([^/]+)~', $url, $m)) return $m[1];
+    if (preg_match('~drive\.google\.com/open\?id=([^&]+)~', $url, $m)) return $m[1];
+    if (str_contains($url, 'drive.google.com') && preg_match('~[?&]id=([^&]+)~', $url, $m)) return $m[1];
+
+    return null;
+  };
+
+  $normalizeDriveThumb = function (?string $url) use ($extractDriveId): ?string {
+    $url = trim((string) $url);
+    if ($url === '') return null;
+
+    // kalau sudah thumbnail / googleusercontent
+    if (str_contains($url, 'drive.google.com/thumbnail')) return $url;
+    if (str_contains($url, 'googleusercontent.com')) return $url;
+
+    $id = $extractDriveId($url);
+    if ($id) {
+      return "https://drive.google.com/thumbnail?id={$id}&sz=w1200";
+      // alternatif:
+      // return "https://lh3.googleusercontent.com/d/{$id}=s1200";
+    }
+
+    return $url;
+  };
+
+  $normalizeDrivePdfPreview = function (?string $url) use ($extractDriveId): ?string {
+    $url = trim((string) $url);
+    if ($url === '') return null;
+
+    if (str_contains($url, 'drive.google.com') && str_contains($url, '/preview')) return $url;
+
+    $id = $extractDriveId($url);
+    if ($id) return "https://drive.google.com/file/d/{$id}/preview";
+
+    return $url;
+  };
+
+  $normalizeDriveDownload = function (?string $url) use ($extractDriveId): ?string {
+    $url = trim((string) $url);
+    if ($url === '') return null;
+
+    $id = $extractDriveId($url);
+    if ($id) return "https://drive.google.com/uc?export=download&id={$id}";
+
+    return $url;
+  };
+
   // ===== Icons (simple outline / flaticon-like) =====
   $ico = [
     'book' => '<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19a2 2 0 0 0 2 2h14"/><path d="M6 3h14v18H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>',
@@ -59,7 +111,6 @@
   svg{ stroke: currentColor; }
   svg *{ vector-effect: non-scaling-stroke; }
 
-  /* IMPORTANT: select option readability */
   select option{ color:#0f172a; background:#ffffff; }
 </style>
 
@@ -100,7 +151,7 @@
         Koleksi buku Islam dan literasi keagamaan untuk meningkatkan ilmu dan wawasan.
       </p>
 
-      {{-- HIGHLIGHT HERO: Jelajahi Ramah Anak (FIX: no var(--gold), consistent theme) --}}
+      {{-- HIGHLIGHT HERO --}}
       <div class="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row">
         <a href="{{ route('perpustakaan.ramah-anak') }}"
            class="group inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-extrabold text-[#13392f]
@@ -202,7 +253,6 @@
           </a>
         </div>
 
-        {{-- keep state when submit search/category --}}
         <input type="hidden" name="view" value="{{ $viewMode }}">
         <input type="hidden" name="tab" value="{{ $activeTab }}">
       </form>
@@ -269,15 +319,13 @@
       </div>
     @else
 
-      {{-- WRAPPER: Sidebar + List --}}
       <div class="grid gap-6 lg:grid-cols-12">
 
-        {{-- SIDEBAR HIGHLIGHT (lebih terlihat, sesuai permintaan kamu) --}}
+        {{-- SIDEBAR --}}
         <aside class="lg:col-span-3">
           <div class="{{ $glass }} p-5">
             <div class="flex items-center gap-3">
-              <div class="h-11 w-11 rounded-2xl grid place-items-center text-[#13392f]"
-                   style="background: var(--accent);">
+              <div class="h-11 w-11 rounded-2xl grid place-items-center text-[#13392f]" style="background: var(--accent);">
                 {!! $ico['kid'] !!}
               </div>
               <div class="min-w-0">
@@ -319,13 +367,26 @@
 
         {{-- BOOK LIST --}}
         <div class="lg:col-span-9">
-          {{-- LIST / GRID --}}
           <section class="{{ $viewMode === 'grid' ? 'grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'space-y-4' }}">
             @foreach ($filteredBooks as $book)
               @php
-                $cover = $book->cover ?? null;
-                if ($cover && ! str_starts_with($cover, 'http')) $cover = Storage::url($cover);
+                // ===== Cover normalize (local vs http vs drive)
+                $coverRaw = $book->cover ?? $book->thumbnail ?? $book->gambar ?? null;
+
+                if ($coverRaw && ! str_starts_with($coverRaw, 'http')) {
+                  $cover = Storage::url($coverRaw);
+                } else {
+                  $cover = $normalizeDriveThumb($coverRaw);
+                }
                 $cover = $cover ?: $fallbackCover;
+
+                // ===== File normalize (for "Baca")
+                $fileRaw = $book->file_ebook ?? null;
+                if ($fileRaw && ! str_starts_with($fileRaw, 'http')) {
+                  $fileUrl = Storage::url($fileRaw);
+                } else {
+                  $fileUrl = $normalizeDrivePdfPreview($fileRaw);
+                }
 
                 $categoryLabel = $book->kategori ?? optional($book->category)->name;
                 $isAvailable = $book->stok_tersedia ?? $book->is_available ?? $book->isAvailable ?? true;
@@ -387,8 +448,8 @@
                         Detail
                       </a>
 
-                      @if (! empty($book->file_ebook))
-                        <a href="{{ $book->file_ebook }}" target="_blank" rel="noreferrer"
+                      @if ($fileUrl)
+                        <a href="{{ $fileUrl }}" target="_blank" rel="noreferrer"
                            class="inline-flex items-center justify-center rounded-2xl border border-white/14 bg-white/6 px-3 py-2.5 text-xs font-extrabold text-white/85 hover:bg-white/10">
                           Baca
                         </a>
@@ -446,8 +507,8 @@
                           Detail
                         </a>
 
-                        @if (! empty($book->file_ebook))
-                          <a href="{{ $book->file_ebook }}" target="_blank" rel="noreferrer"
+                        @if ($fileUrl)
+                          <a href="{{ $fileUrl }}" target="_blank" rel="noreferrer"
                              class="inline-flex items-center justify-center rounded-2xl border border-white/14 bg-white/6 px-3 py-2.5 text-xs font-extrabold text-white/85 hover:bg-white/10">
                             Baca
                           </a>
@@ -460,7 +521,7 @@
             @endforeach
           </section>
 
-          {{-- PAGINATION (keeps filters) --}}
+          {{-- PAGINATION --}}
           @if ($perpustakaans instanceof \Illuminate\Pagination\AbstractPaginator)
             <div class="mt-8">
               {{ $perpustakaans->appends(request()->query())->links() }}

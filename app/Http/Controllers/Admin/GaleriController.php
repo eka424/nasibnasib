@@ -12,7 +12,6 @@ use Illuminate\View\View;
 
 class GaleriController extends Controller
 {
-    // Peta seksi (samakan dengan frontend)
     private array $sectionsMap = [
         'idarah' => [
             'SEKSI DOKUMENTASI, PERPUSTAKAAN DAN PENERBITAN',
@@ -43,7 +42,6 @@ class GaleriController extends Controller
     public function index(Request $request): View
     {
         $filters = $request->only(['q', 'tipe', 'sort', 'kategori', 'seksi']);
-
         $galeriQuery = Galeri::query();
 
         if ($search = trim((string) ($filters['q'] ?? ''))) {
@@ -57,11 +55,11 @@ class GaleriController extends Controller
             $galeriQuery->where('tipe', $type);
         }
 
-        // filter baru (optional)
-        if ($kategori = $filters['kategori'] ?? null) {
+        if (($kategori = $filters['kategori'] ?? null) !== null && $kategori !== '') {
             $galeriQuery->where('kategori', $kategori);
         }
-        if ($seksi = $filters['seksi'] ?? null) {
+
+        if (($seksi = $filters['seksi'] ?? null) !== null && $seksi !== '') {
             $galeriQuery->where('seksi', $seksi);
         }
 
@@ -123,7 +121,6 @@ class GaleriController extends Controller
             'riayah' => 'Riayah',
         ];
 
-        // untuk filter seksi di index (optional)
         $sectionsMap = $this->sectionsMap;
 
         return view('admin.galeris.index', compact(
@@ -152,7 +149,10 @@ class GaleriController extends Controller
     public function store(GaleriRequest $request): RedirectResponse
     {
         Galeri::create($this->prepareData($request));
-        return redirect()->route('admin.galeris.index')->with('success', 'Galeri ditambahkan.');
+
+        return redirect()
+            ->route('admin.galeris.index')
+            ->with('success', 'Galeri berhasil disimpan ✅');
     }
 
     public function show(Galeri $galeri): View
@@ -174,13 +174,16 @@ class GaleriController extends Controller
 
     public function update(GaleriRequest $request, Galeri $galeri): RedirectResponse
     {
-        if ($request->hasFile('attachment')) {
+        // kalau sebelumnya masih ada file lokal lama, biar bersih
+        if ($galeri->url_file && ! str_starts_with($galeri->url_file, 'http')) {
             $this->deleteAsset($galeri->url_file);
         }
 
         $galeri->update($this->prepareData($request, $galeri));
 
-        return redirect()->route('admin.galeris.index')->with('success', 'Galeri diperbarui.');
+        return redirect()
+            ->route('admin.galeris.index')
+            ->with('success', 'Galeri berhasil diperbarui ✅');
     }
 
     public function destroy(Galeri $galeri): RedirectResponse
@@ -188,23 +191,110 @@ class GaleriController extends Controller
         $this->deleteAsset($galeri->url_file);
         $galeri->delete();
 
-        return redirect()->route('admin.galeris.index')->with('success', 'Galeri dihapus.');
+        return redirect()
+            ->route('admin.galeris.index')
+            ->with('success', 'Galeri berhasil dihapus ✅');
     }
 
     protected function prepareData(GaleriRequest $request, ?Galeri $galeri = null): array
     {
-        $data = $request->safe()->except('attachment');
+        // ambil data yang memang kita simpan
+        $data = $request->safe()->only([
+            'judul', 'deskripsi', 'tipe', 'kategori', 'seksi', 'url_file',
+        ]);
 
-        // Normalisasi seksi: kalau kosong, set null (atau bisa default "Lainnya")
         $data['seksi'] = $request->filled('seksi') ? $request->input('seksi') : null;
 
-        if ($request->hasFile('attachment')) {
-            $data['url_file'] = $request->file('attachment')->store('galeri', 'public');
-        } elseif (! $request->filled('url_file') && $galeri) {
-            $data['url_file'] = $galeri->url_file;
+        // ✅ PAKSA url_file terset + dinormalisasi
+        $rawUrl = trim((string) $request->input('url_file'));
+
+        if (($data['tipe'] ?? null) === 'image') {
+            $data['url_file'] = $this->normalizeDriveImageThumb($rawUrl);
+        } else {
+            // video
+            $data['url_file'] = $this->normalizeVideoUrl($rawUrl);
         }
 
         return $data;
+    }
+
+    protected function normalizeVideoUrl(string $url): string
+    {
+        // youtube -> embed
+        $yt = $this->normalizeYoutubeEmbed($url);
+        if ($yt) return $yt;
+
+        // drive -> preview
+        $driveId = $this->extractDriveId($url);
+        if ($driveId) {
+            return "https://drive.google.com/file/d/{$driveId}/preview";
+        }
+
+        // fallback (misal link mp4 langsung)
+        return $url;
+    }
+
+    protected function normalizeYoutubeEmbed(string $url): ?string
+    {
+        $url = trim($url);
+
+        // youtu.be/{id}
+        if (preg_match('~youtu\.be/([a-zA-Z0-9_-]{6,})~', $url, $m)) {
+            return "https://www.youtube.com/embed/{$m[1]}";
+        }
+
+        // youtube.com/watch?v={id}
+        if (preg_match('~youtube\.com/watch\?v=([a-zA-Z0-9_-]{6,})~', $url, $m)) {
+            return "https://www.youtube.com/embed/{$m[1]}";
+        }
+
+        // youtube.com/shorts/{id}
+        if (preg_match('~youtube\.com/shorts/([a-zA-Z0-9_-]{6,})~', $url, $m)) {
+            return "https://www.youtube.com/embed/{$m[1]}";
+        }
+
+        // already embed
+        if (str_contains($url, 'youtube.com/embed/')) {
+            return $url;
+        }
+
+        return null;
+    }
+
+    protected function normalizeDriveImageThumb(string $url): string
+    {
+        $url = trim($url);
+
+        // kalau sudah thumbnail
+        if (str_contains($url, 'drive.google.com/thumbnail')) return $url;
+
+        $id = $this->extractDriveId($url);
+        if ($id) {
+            return "https://drive.google.com/thumbnail?id={$id}&sz=w1200";
+        }
+
+        // fallback
+        return $url;
+    }
+
+    protected function extractDriveId(string $url): ?string
+    {
+        // file/d/{id}/...
+        if (preg_match('~drive\.google\.com/file/d/([^/]+)~', $url, $m)) {
+            return $m[1];
+        }
+
+        // open?id={id}
+        if (preg_match('~drive\.google\.com/open\?id=([^&]+)~', $url, $m)) {
+            return $m[1];
+        }
+
+        // ...?id={id}
+        if (preg_match('~[?&]id=([^&]+)~', $url, $m)) {
+            return $m[1];
+        }
+
+        return null;
     }
 
     protected function deleteAsset(?string $path): void

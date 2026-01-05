@@ -20,7 +20,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('admin.mosque_profile.update') }}" class="space-y-6">
+    <form method="POST" action="{{ route('admin.profil.update') }}" class="space-y-6">
         @csrf
         @method('PUT')
 

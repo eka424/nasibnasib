@@ -9,6 +9,7 @@ use App\Models\PendaftaranKegiatan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Carbon\Carbon;
 
 class KegiatanFrontController extends Controller
 {
@@ -60,6 +61,49 @@ class KegiatanFrontController extends Controller
         'type' => 'success',
         'message' => $message,
         'gcal' => $kegiatan->google_calendar_url, // dari accessor model
+    ]);
+}
+public function calendar(Request $request)
+{
+    $tz = 'Asia/Makassar';
+
+    $month = $request->query('month'); // 2026-01
+    $base = $month
+        ? Carbon::createFromFormat('Y-m', $month, $tz)->startOfMonth()
+        : Carbon::now($tz)->startOfMonth();
+
+    // grid kalender: mulai Senin, sampai Minggu
+    $start = $base->copy()->startOfWeek(Carbon::MONDAY)->startOfDay();
+    $end   = $base->copy()->endOfMonth()->endOfWeek(Carbon::SUNDAY)->endOfDay();
+
+    // AMBIL semua kegiatan yang tanggal_mulai-nya masuk range grid
+    $items = Kegiatan::query()
+        ->whereBetween('tanggal_mulai', [$start, $end])
+        ->orderBy('tanggal_mulai')
+        ->get();
+
+    // GROUP by tanggal (Y-m-d) pakai timezone WITA
+    $byDate = $items
+        ->groupBy(fn ($k) => $k->tanggal_mulai
+            ? $k->tanggal_mulai->copy()->timezone($tz)->toDateString()
+            : null
+        )
+        ->filter(); // buang key null kalau ada
+
+    // bikin array tanggal untuk grid
+    $days = [];
+    $cursor = $start->copy();
+    while ($cursor->lte($end)) {
+        $days[] = $cursor->copy();
+        $cursor->addDay();
+    }
+
+    return view('frontend.kegiatan.calendar', [
+        'base'   => $base,
+        'days'   => $days,
+        'byDate' => $byDate,
+        'events' => $items, // ini buat list bawah biar sama persis
+        'tz'     => $tz,
     ]);
 }
 

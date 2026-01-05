@@ -187,6 +187,10 @@
               class="date-dark h-11 w-full rounded-2xl border px-3 text-sm focus:outline-none" />
           </div>
         </div>
+<a href="{{ route('kegiatan.calendar') }}"
+   class="inline-flex items-center rounded-xl bg-[#E7B14B] px-4 py-2 text-sm font-bold text-[#13392f]">
+  Kalender Kegiatan →
+</a>
 
         <div>
           <p class="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-white/70">Jenis</p>
