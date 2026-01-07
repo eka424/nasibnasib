@@ -8,6 +8,7 @@ use App\Models\Kegiatan;
 use App\Models\PendaftaranKegiatan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB; // ✅ INI YANG BENAR
 use Illuminate\View\View;
 use Carbon\Carbon;
 
@@ -34,35 +35,82 @@ class KegiatanFrontController extends Controller
     }
 
     public function show(Kegiatan $kegiatan): View
-    {
-        $kegiatan->load('pendaftarans');
+{
+    $kegiatan->loadCount('pendaftarans');
 
-        return view('front.kegiatans.show', compact('kegiatan'));
+    $user = request()->user();
+    $sudahDaftar = false;
+
+    if ($user) {
+        $sudahDaftar = $kegiatan->pendaftarans()
+            ->where('user_id', $user->id)
+            ->exists();
     }
 
-   public function daftar(KegiatanDaftarRequest $request, Kegiatan $kegiatan): RedirectResponse
+    return view('front.kegiatans.show', compact('kegiatan', 'sudahDaftar'));
+}
+
+
+
+public function daftar(KegiatanDaftarRequest $request, Kegiatan $kegiatan): RedirectResponse
 {
     $user = $request->user();
     $this->authorize('create', PendaftaranKegiatan::class);
 
-    $pendaftaran = PendaftaranKegiatan::firstOrCreate([
-        'user_id' => $user->id,
-        'kegiatan_id' => $kegiatan->id,
-    ]);
+    $result = DB::transaction(function () use ($kegiatan, $user) {
+        // kunci row kegiatan biar request barengan gak tembus kuota
+        $kegiatanLocked = Kegiatan::query()
+            ->whereKey($kegiatan->id)
+            ->lockForUpdate()
+            ->firstOrFail();
 
-    // pesan dinamis
-    $isNew = $pendaftaran->wasRecentlyCreated;
+        // kalau sudah daftar
+        $existing = PendaftaranKegiatan::query()
+            ->where('user_id', $user->id)
+            ->where('kegiatan_id', $kegiatanLocked->id)
+            ->first();
 
-    $message = $isNew
+        if ($existing) {
+            return ['status' => 'already'];
+        }
+
+        // cek kuota
+        $terdaftar = PendaftaranKegiatan::query()
+            ->where('kegiatan_id', $kegiatanLocked->id)
+            ->count();
+
+        if ($kegiatanLocked->kuota && $terdaftar >= $kegiatanLocked->kuota) {
+            return ['status' => 'full'];
+        }
+
+        PendaftaranKegiatan::create([
+            'user_id' => $user->id,
+            'kegiatan_id' => $kegiatanLocked->id,
+        ]);
+
+        return ['status' => 'new'];
+    });
+
+    if ($result['status'] === 'full') {
+        return back()->with('kegiatan_flash', [
+            'type' => 'warning',
+            'message' => 'Maaf, kuota pendaftaran sudah penuh. Pendaftaran ditutup.',
+            'gcal' => null,
+        ]);
+    }
+
+    $message = $result['status'] === 'new'
         ? "Pendaftaran berhasil. Anda sudah terdaftar, jangan lupa datang pada tanggal {$kegiatan->tanggal_mulai_label}."
         : "Alhamdulillah - Anda sudah terdaftar. Jangan lupa datang pada tanggal {$kegiatan->tanggal_mulai_label}.";
 
     return back()->with('kegiatan_flash', [
         'type' => 'success',
         'message' => $message,
-        'gcal' => $kegiatan->google_calendar_url, // dari accessor model
+        'gcal' => $kegiatan->google_calendar_url,
     ]);
 }
+
+
 public function calendar(Request $request)
 {
     $tz = 'Asia/Makassar';

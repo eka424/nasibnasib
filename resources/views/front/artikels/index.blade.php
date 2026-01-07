@@ -292,14 +292,7 @@
                             </a>
                         </div>
 
-                        <div class="rounded-[28px] border border-white/14 bg-white/6 p-6 shadow-lg shadow-black/10 backdrop-blur">
-                            <p class="heading text-sm font-extrabold text-white">Donasi & Infaq</p>
-                            <p class="mt-3 text-base font-semibold text-white">Dukung program sosial masjid dan infaq rutin.</p>
-                            <p class="mt-2 text-sm text-white/75">Cepat, aman, dan transparan.</p>
-                            <a href="{{ route('sedekah.index') }}" class="btn mt-4 inline-flex w-full items-center justify-center gap-2 {{ $btnAccent }}">
-                                {!! $svg['heart'] !!} Donasi Sekarang
-                            </a>
-                        </div>
+                       
 
                         <div class="{{ $glass }} p-5 sm:p-6">
                             <p class="heading text-sm font-extrabold text-white">Catatan</p>

@@ -273,10 +273,18 @@
               default => 'bg-white/6 text-white/80 border-white/12',
             };
 
-            $count = $kegiatan->pendaftarans_count ?? 0;
-            $quota = max($count + 20, 20);
-            $remaining = max(0, $quota - $count);
-            $progress = min(100, round(($count / max(1, $quota)) * 100));
+             $count = (int) ($kegiatan->pendaftarans_count ?? 0);
+
+  // ✅ ambil dari DB (admin input)
+  $quota = $kegiatan->kuota; // null = terbuka
+
+  $isOpenQuota = empty($quota);
+  $remaining = $isOpenQuota ? null : max(0, (int)$quota - $count);
+
+  // progress hanya kalau ada kuota
+  $progress = $isOpenQuota ? 0 : min(100, (int) round(($count / max(1, (int)$quota)) * 100));
+
+  $isFull = !$isOpenQuota && $count >= (int)$quota;
 
             $poster = $kegiatan->poster ?? 'https://images.unsplash.com/photo-1526772662000-3f88f10405ff?auto=format&fit=crop&w=1400&q=80';
           @endphp
@@ -326,15 +334,27 @@
 
               {{-- Progress --}}
               <div>
-                <div class="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
-                  <div class="h-full rounded-full"
-                       style="width: {{ $progress }}%; background: linear-gradient(90deg, {{ $accent }}, #0F4A3A);"></div>
-                </div>
-                <div class="mt-1 flex items-center justify-between text-[11px] text-slate-500">
-                  <span>{{ $remaining }} kursi tersisa</span>
-                  <span>{{ $count }}/{{ $quota }}</span>
-                </div>
-              </div>
+  @if($isOpenQuota)
+    <div class="mt-1 flex items-center justify-between text-[11px] text-slate-500">
+      <span>Kuota terbuka</span>
+      <span>{{ $count }} terdaftar</span>
+    </div>
+  @else
+    <div class="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+      <div class="h-full rounded-full"
+           style="width: {{ $progress }}%; background: linear-gradient(90deg, {{ $accent }}, #0F4A3A);"></div>
+    </div>
+
+    <div class="mt-1 flex items-center justify-between text-[11px] text-slate-500">
+      @if($isFull)
+        <span class="font-semibold text-red-600">Kuota Penuh</span>
+      @else
+        <span>{{ $remaining }} kursi tersisa</span>
+      @endif
+      <span>{{ $count }}/{{ $quota }}</span>
+    </div>
+  @endif
+</div>
 
               <div class="flex items-center justify-between gap-2 pt-1">
                 <a href="{{ route('kegiatan.show', $kegiatan) }}"

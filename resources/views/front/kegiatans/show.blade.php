@@ -75,6 +75,13 @@
     'wa' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-13.5 7.8L3 21l1.3-4.2A9 9 0 1 1 21 12z"/><path d="M8.5 10.5c.7 2 2.2 3.5 4.2 4.2"/><path d="M13.2 14.7l1.6-.5c.3-.1.7 0 .9.3l.6.8"/></svg>',
     'arrow' => '<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>',
   ];
+  $terdaftar = (int) ($kegiatan->pendaftarans_count ?? 0);
+$kuota = $kegiatan->kuota; // null = terbuka
+$sisa = $kuota ? max(0, $kuota - $terdaftar) : null;
+$penuh = $kuota ? ($terdaftar >= $kuota) : false;
+
+// user sudah daftar? (dari controller show)
+$sudahDaftar = $sudahDaftar ?? false;
 @endphp
 
 <style>
@@ -309,7 +316,17 @@
               <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
                 <p class="text-xs text-slate-500">Kuota</p>
                 <p class="mt-0.5 text-sm font-semibold text-slate-900">
-                  {{ !empty($kegiatan->kuota) ? $kegiatan->kuota.' orang' : 'Terbuka' }}
+                  @if($kuota)
+  {{ number_format($kuota) }} orang
+  <div class="mt-1 text-xs text-slate-500">
+    Terdaftar: {{ number_format($terdaftar) }} • Sisa: {{ number_format($sisa) }}
+  </div>
+@else
+  Terbuka
+  <div class="mt-1 text-xs text-slate-500">
+    Terdaftar: {{ number_format($terdaftar) }}
+  </div>
+@endif
                 </p>
               </div>
 
@@ -349,21 +366,36 @@
 
             <div class="mt-4 space-y-2">
               @auth
-                <form action="{{ route('kegiatan.daftar', $kegiatan) }}" method="POST">
-                  @csrf
-                  <button type="submit"
-                    class="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white hover:brightness-110 active:scale-[0.99]"
-                    style="background: var(--primary);">
-                    {!! $ico['check'] !!} Daftar Kegiatan
-                  </button>
-                </form>
-              @else
-                <a href="{{ route('login') }}"
-                  class="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white hover:brightness-110"
-                  style="background: var(--primary);">
-                  {!! $ico['arrow'] !!} Login untuk Daftar
-                </a>
-              @endauth
+  @if($sudahDaftar)
+    <button type="button" disabled
+      class="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white/75 cursor-not-allowed"
+      style="background: rgba(255,255,255,0.12);">
+      {!! $ico['check'] !!} Sudah Terdaftar
+    </button>
+  @elseif($penuh)
+    <button type="button" disabled
+      class="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white/75 cursor-not-allowed"
+      style="background: rgba(255,255,255,0.12);">
+      {!! $ico['badge'] !!} Kuota Penuh (Ditutup)
+    </button>
+  @else
+    <form action="{{ route('kegiatan.daftar', $kegiatan) }}" method="POST">
+      @csrf
+      <button type="submit"
+        class="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white hover:brightness-110 active:scale-[0.99]"
+        style="background: var(--primary);">
+        {!! $ico['check'] !!} Daftar Kegiatan
+      </button>
+    </form>
+  @endif
+@else
+  <a href="{{ route('login') }}"
+    class="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white hover:brightness-110"
+    style="background: var(--primary);">
+    {!! $ico['arrow'] !!} Login untuk Daftar
+  </a>
+@endauth
+
 
               <div class="grid grid-cols-2 gap-2">
                 @if($gcalLink)
@@ -415,21 +447,36 @@
     <div class="mx-auto max-w-7xl">
       <div class="grid grid-cols-2 gap-2">
         @auth
-          <form action="{{ route('kegiatan.daftar', $kegiatan) }}" method="POST">
-            @csrf
-            <button type="submit"
-              class="w-full rounded-2xl px-4 py-3 text-sm font-semibold text-white hover:brightness-110 active:scale-[0.99]"
-              style="background: var(--primary);">
-              {!! $ico['check'] !!} Daftar
-            </button>
-          </form>
-        @else
-          <a href="{{ route('login') }}"
-            class="w-full rounded-2xl px-4 py-3 text-center text-sm font-semibold text-white hover:brightness-110"
-            style="background: var(--primary);">
-            {!! $ico['arrow'] !!} Login
-          </a>
-        @endauth
+  @if($sudahDaftar)
+    <button type="button" disabled
+      class="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white/75 cursor-not-allowed"
+      style="background: rgba(255,255,255,0.12);">
+      {!! $ico['check'] !!} Sudah Terdaftar
+    </button>
+  @elseif($penuh)
+    <button type="button" disabled
+      class="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white/75 cursor-not-allowed"
+      style="background: rgba(255,255,255,0.12);">
+      {!! $ico['badge'] !!} Kuota Penuh (Ditutup)
+    </button>
+  @else
+    <form action="{{ route('kegiatan.daftar', $kegiatan) }}" method="POST">
+      @csrf
+      <button type="submit"
+        class="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white hover:brightness-110 active:scale-[0.99]"
+        style="background: var(--primary);">
+        {!! $ico['check'] !!} Daftar Kegiatan
+      </button>
+    </form>
+  @endif
+@else
+  <a href="{{ route('login') }}"
+    class="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white hover:brightness-110"
+    style="background: var(--primary);">
+    {!! $ico['arrow'] !!} Login untuk Daftar
+  </a>
+@endauth
+
 
         @if($waLink)
           <a href="{{ $waLink }}" target="_blank" rel="noreferrer"
@@ -447,6 +494,14 @@
       </div>
     </div>
   </div>
+<td class="hidden p-2 align-middle lg:table-cell">
+  @if($kegiatan->kuota)
+    {{ number_format($kegiatan->kuota) }}
+    <div class="text-xs text-slate-500">Sisa: {{ max(0, $kegiatan->kuota - $kegiatan->pendaftarans_count) }}</div>
+  @else
+    <span class="text-slate-500">Terbuka</span>
+  @endif
+</td>
 
   {{-- Scripts --}}
   <script>

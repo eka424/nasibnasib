@@ -10,14 +10,12 @@ class PendaftaranKegiatan extends Model
 {
     use HasFactory;
 
+    protected $table = 'pendaftaran_kegiatans';
+
     protected $fillable = [
         'user_id',
         'kegiatan_id',
         'status',
-    ];
-
-    protected $casts = [
-        'status' => 'string',
     ];
 
     public function user(): BelongsTo

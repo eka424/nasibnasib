@@ -20,6 +20,8 @@ class KegiatanRequest extends FormRequest
             'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal_mulai'],
             'lokasi' => ['nullable', 'string', 'max:255'],
             'poster' => ['nullable', 'string', 'max:2048'],
+            'kuota' => ['nullable', 'integer', 'min:1'],
+
         ];
     }
 }

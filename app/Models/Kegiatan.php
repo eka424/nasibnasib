@@ -17,16 +17,21 @@ class Kegiatan extends Model
         'tanggal_selesai',
         'lokasi',
         'poster',
+        'kuota', // ✅ tambah
     ];
 
     protected $casts = [
         'tanggal_mulai' => 'datetime',
         'tanggal_selesai' => 'datetime',
+        'kuota' => 'integer', // ✅ tambah
     ];
 
     protected $appends = [
         'google_calendar_url',
         'tanggal_mulai_label',
+        'kuota_label',
+        'sisa_kuota',
+        'is_penuh',
     ];
 
     public function pendaftarans(): HasMany
@@ -38,6 +43,34 @@ class Kegiatan extends Model
     {
         if (!$this->tanggal_mulai) return '-';
         return $this->tanggal_mulai->locale('id')->translatedFormat('l, d M Y • H:i') . ' WITA';
+    }
+
+    public function getKuotaLabelAttribute(): string
+    {
+        return $this->kuota ? number_format($this->kuota) . ' orang' : 'Terbuka';
+    }
+
+    public function getSisaKuotaAttribute(): ?int
+    {
+        if (!$this->kuota) return null;
+
+        // pakai pendaftarans_count kalau sudah di-load withCount
+        $terdaftar = isset($this->pendaftarans_count)
+            ? (int) $this->pendaftarans_count
+            : (int) $this->pendaftarans()->count();
+
+        return max(0, $this->kuota - $terdaftar);
+    }
+
+    public function getIsPenuhAttribute(): bool
+    {
+        if (!$this->kuota) return false;
+
+        $terdaftar = isset($this->pendaftarans_count)
+            ? (int) $this->pendaftarans_count
+            : (int) $this->pendaftarans()->count();
+
+        return $terdaftar >= $this->kuota;
     }
 
     public function getGoogleCalendarUrlAttribute(): ?string

@@ -266,7 +266,7 @@
               Masjid Agung Al-A&#39;la
             </h1>
 
-            <p class="mt-3 max-w-2xl text-sm text-white/75 sm:text-base text-justify leading-relaxed">
+            <p class="mt-3 text-sm text-white/75 sm:text-base text-justify leading-relaxed">
   Masjid Agung Al-A'la merupakan pusat peribadatan umat Muslim sekaligus simbol toleransi beragama yang terletak di jantung Kota Gianyar, Bali. Sebagai masjid terbesar di kabupaten tersebut, bangunannya berdiri megah dengan arsitektur modern yang dipadukan dengan menara tinggi yang menjulang, menjadikannya salah satu landmark religi yang ikonik di kawasan tersebut.
 
   <br><br>
@@ -297,7 +297,7 @@
       </span>
       <div class="min-w-0">
         <div class="heading text-sm sm:text-base font-extrabold text-white">
-          Transparansi Keuangan Masjid Agung Al-A&#39;la
+          Laporan Keuangan Masjid Agung Al-A&#39;la
         </div>
         <div class="text-xs text-white/70">
           Lihat pemasukan, pengeluaran, saldo, & bukti transaksi publik.
