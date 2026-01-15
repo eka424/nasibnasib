@@ -16,16 +16,16 @@ class GaleriRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'judul' => ['required', 'string', 'max:255'],
-            'deskripsi' => ['nullable', 'string'],
+    'judul' => ['required', 'string', 'max:255'],
+    'deskripsi' => ['nullable', 'string'],
+    'url_file' => ['required', 'url', 'max:2000'],
+    'gdrive_url' => ['nullable', 'url', 'max:2000'], // ✅ tambah ini
+    'tipe' => ['required', Rule::in(['image', 'video'])],
+    'kategori' => ['required', Rule::in(['idarah', 'imarah', 'riayah'])],
+    'seksi' => ['nullable', 'string', 'max:255'],
+];
+$table->text('gdrive_url')->nullable()->after('url_file');
 
-            // kita pakai URL saja (Drive/Youtube/link mp4)
-            'url_file' => ['required', 'url', 'max:2000'],
-
-            'tipe' => ['required', Rule::in(['image', 'video'])],
-            'kategori' => ['required', Rule::in(['idarah', 'imarah', 'riayah'])],
-            'seksi' => ['nullable', 'string', 'max:255'],
-        ];
     }
 
     public function withValidator(Validator $validator): void

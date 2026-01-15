@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Galeri extends Model
 {
     protected $fillable = [
-        'judul', 'deskripsi', 'url_file', 'tipe', 'kategori', 'seksi',
-    ];
+    'judul', 'deskripsi', 'url_file', 'gdrive_url', 'tipe', 'kategori', 'seksi',
+];
+
 
     // Biar bisa dipanggil: $galeri->file_src
     protected $appends = ['file_src'];

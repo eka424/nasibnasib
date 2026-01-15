@@ -14,6 +14,21 @@
         <input type="email" name="email" value="{{ old('email', $user->email ?? '') }}"
             class="mt-1 w-full rounded border-gray-300" required>
     </div>
+    {{-- No. HP --}}
+<div class="mt-4">
+  <label class="block text-sm font-medium text-slate-700">No. HP</label>
+  <input
+    type="text"
+    name="phone"
+    value="{{ old('phone', $user->phone ?? '') }}"
+    placeholder="contoh: 0813xxxxxxx"
+    class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200"
+  />
+  @error('phone')
+    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+  @enderror
+</div>
+
     <div>
         <label class="block text-sm font-medium text-gray-700">Role</label>
         <select name="role" class="mt-1 w-full rounded border-gray-300" required>

@@ -45,6 +45,19 @@
         </select>
         <p class="text-xs text-gray-500 mt-1">Seksi akan mengikuti kategori.</p>
     </div>
+<div>
+  <label class="block text-sm font-medium text-gray-700">Link Google Drive (Foto Lainnya)</label>
+  <input
+    type="url"
+    name="gdrive_url"
+    value="{{ old('gdrive_url', $galeri->gdrive_url ?? '') }}"
+    placeholder="https://drive.google.com/drive/folders/xxxx"
+    class="mt-1 w-full rounded border-gray-300"
+  />
+  <p class="text-xs text-gray-500 mt-1">
+    Opsional. Kalau diisi, tombol "Lihat Foto Lainnya" akan muncul di halaman detail.
+  </p>
+</div>
 
     <div>
         <label class="block text-sm font-medium text-gray-700">Link Google Drive / YouTube</label>

@@ -1,110 +1,88 @@
 <x-front-layout>
 @php
-    $bg     = '#13392f';
-    $accent = '#E7B14B';
-    $glass  = 'rounded-[26px] border border-white/12 bg-white/8 shadow-[0_18px_60px_-45px_rgba(0,0,0,0.55)] backdrop-blur';
+  // ================= THEME =================
+  $bg     = $bg ?? '#13392f';
+  $accent = $accent ?? '#E7B14B';
+  $glass  = $glass ?? 'rounded-[26px] border border-white/12 bg-white/8 shadow-[0_18px_60px_-45px_rgba(0,0,0,0.55)] backdrop-blur';
 
-    // fallback hanya kalau url_file kosong / error load
-    $fallbackImg = 'https://images.unsplash.com/photo-1496302662116-35cc4f36df92?auto=format&fit=crop&w=1200&q=80';
+  // ================= HELPERS =================
+  $extractDriveId = function (?string $url): ?string {
+      $url = trim((string)$url);
+      if ($url === '') return null;
 
-    $getDriveId = function (?string $url): ?string {
-        $url = trim((string)$url);
-        if ($url === '') return null;
+      // /file/d/{id}/...
+      if (preg_match('~drive\.google\.com/file/d/([^/]+)~', $url, $m)) return $m[1];
 
-        if (preg_match('~drive\.google\.com/file/d/([^/]+)~', $url, $m)) return $m[1];
+      // thumbnail?id={id}
+      if (preg_match('~drive\.google\.com/thumbnail\?id=([^&]+)~', $url, $m)) return $m[1];
 
-        $parts = parse_url($url);
-        if (!empty($parts['query'])) {
-            parse_str($parts['query'], $q);
-            if (!empty($q['id'])) return $q['id'];
-        }
+      // uc?export=...&id={id}  atau uc?id={id}
+      if (preg_match('~drive\.google\.com/uc\?(?:[^#]*&)?id=([^&]+)~', $url, $m)) return $m[1];
 
-        if (preg_match('~[?&]id=([^&]+)~', $url, $m)) return $m[1];
-        return null;
-    };
+      // open?id={id} atau apapun yang punya ?id=
+      $parts = parse_url($url);
+      if (!empty($parts['query'])) {
+          parse_str($parts['query'], $q);
+          if (!empty($q['id'])) return (string)$q['id'];
+      }
 
-    $driveView = function (?string $url) use ($getDriveId): ?string {
-        $url = trim((string)$url);
-        if ($url === '') return null;
+      return null;
+  };
 
-        if (str_contains($url, 'drive.google.com/uc?') && preg_match('~[?&]id=([^&]+)~', $url, $m)) {
-            return "https://drive.google.com/uc?export=view&id={$m[1]}";
-        }
+  $youtubeId = function (?string $url): ?string {
+      $url = trim((string)$url);
+      if ($url === '') return null;
 
-        $id = $getDriveId($url);
-        return $id ? "https://drive.google.com/uc?export=view&id={$id}" : $url;
-    };
+      if (preg_match('~youtu\.be/([^?&/]+)~', $url, $m)) return $m[1];
+      if (preg_match('~youtube\.com/watch\?v=([^&]+)~', $url, $m)) return $m[1];
+      if (preg_match('~youtube\.com/embed/([^?&/]+)~', $url, $m)) return $m[1];
+      if (preg_match('~youtube\.com/shorts/([^?&/]+)~', $url, $m)) return $m[1];
+      return null;
+  };
 
-    $driveDownload = function (?string $url) use ($getDriveId): ?string {
-        $url = trim((string)$url);
-        if ($url === '') return null;
+  // ================= DATA =================
+  $type = $galeri->tipe ?? 'image';
 
-        if (str_contains($url, 'drive.google.com/uc?') && preg_match('~[?&]id=([^&]+)~', $url, $m)) {
-            return "https://drive.google.com/uc?export=download&id={$m[1]}";
-        }
+  // url_file dari DB (bisa thumbnail / view / uc / dll)
+  $rawUrl = trim((string)($galeri->url_file ?? ''));
 
-        $id = $getDriveId($url);
-        return $id ? "https://drive.google.com/uc?export=download&id={$id}" : $url;
-    };
+  // tombol foto lainnya (opsional)
+  $gdriveMore = trim((string)($galeri->gdrive_url ?? ''));
 
-    $drivePreview = function (?string $url) use ($getDriveId): ?string {
-        $url = trim((string)$url);
-        if ($url === '') return null;
+  // ================= NORMALIZE FINAL =================
+  // kita paksa bikin URL final yang "pasti tampil"
+  $fileSrc = $rawUrl; // yang dipakai tampil
+  $action  = $rawUrl; // tombol unduh/buka
 
-        if (str_contains($url, 'drive.google.com') && str_contains($url, '/preview')) return $url;
+  // 1) YOUTUBE (video)
+  if ($type === 'video') {
+      $yt = $youtubeId($rawUrl);
+      if ($yt) {
+          $fileSrc = "https://www.youtube.com/embed/{$yt}";
+          $action  = $rawUrl;
+      }
+  }
 
-        $id = $getDriveId($url);
-        return $id ? "https://drive.google.com/file/d/{$id}/preview" : $url;
-    };
+  // 2) GOOGLE DRIVE (image/video)
+  $driveId = $extractDriveId($rawUrl);
+  if ($driveId) {
+      if ($type === 'image') {
+          // tampil gambar: paling aman pakai thumbnail (hotlink)
+          $fileSrc = "https://drive.google.com/thumbnail?id={$driveId}&sz=w1600";
 
-    $youtubeId = function (?string $url): ?string {
-        $url = trim((string)$url);
-        if ($url === '') return null;
+          // tombol unduh
+          $action  = "https://drive.google.com/uc?export=download&id={$driveId}";
+      } else {
+          // video drive: iframe preview
+          $fileSrc = "https://drive.google.com/file/d/{$driveId}/preview";
+          $action  = $rawUrl;
+      }
+  }
 
-        if (preg_match('~youtu\.be/([^?&/]+)~', $url, $m)) return $m[1];
-        if (preg_match('~youtube\.com/watch\?v=([^&]+)~', $url, $m)) return $m[1];
-        if (preg_match('~youtube\.com/embed/([^?&/]+)~', $url, $m)) return $m[1];
-
-        return null;
-    };
-
-    $youtubeEmbed = function (?string $url) use ($youtubeId): ?string {
-        $id = $youtubeId($url);
-        return $id ? "https://www.youtube.com/embed/{$id}" : $url;
-    };
-
-    // ===== normalize sumber =====
-    $raw  = $galeri->url_file ?? '';
-    $type = $galeri->tipe ?? 'image';
-
-    $url = $raw;
-    if ($url && !str_starts_with($url, 'http')) {
-        $url = \Illuminate\Support\Facades\Storage::url($url);
-    }
-
-    $fileSrc = $url ?: $fallbackImg; // untuk img/iframe/video
-    $action  = $url ?: '#';          // tombol unduh/buka
-
-    // YouTube
-    if ($type === 'video' && $url && $youtubeId($url)) {
-        $fileSrc = $youtubeEmbed($url);
-        $action  = $url;
-    }
-
-    // Drive
-    if ($url && str_contains($url, 'drive.google.com')) {
-        if ($type === 'image') {
-            $fileSrc = $driveView($url) ?: $fileSrc;
-            $action  = $driveDownload($url) ?: $action;
-        } else {
-            $fileSrc = $drivePreview($url) ?: $fileSrc;
-            $action  = $url ?: $action;
-        }
-    }
-
-    $tanggal  = optional($galeri->created_at)->format('d M Y') ?? '-';
-    $kategori = strtoupper($galeri->kategori ?? '-');
-    $seksi    = $galeri->seksi ?? '-';
+  // ================= META =================
+  $tanggal  = optional($galeri->created_at)->format('d M Y') ?? '-';
+  $kategori = strtoupper($galeri->kategori ?? '-');
+  $seksi    = $galeri->seksi ?? '-';
 @endphp
 
 <style>
@@ -128,31 +106,51 @@
       <div class="lg:col-span-8 {{ $glass }} p-4">
         <div class="overflow-hidden rounded-3xl border border-white/10 bg-black/30 flex items-center justify-center">
           @if($type === 'video')
-            @php
-              $isEmbed = str_contains($fileSrc, 'youtube.com/embed/')
-                        || (str_contains($fileSrc, 'drive.google.com') && str_contains($fileSrc, '/preview'));
-            @endphp
-
-            @if($isEmbed)
-              <iframe
-                src="{{ $fileSrc }}"
-                class="w-full h-[60vh]"
-                loading="lazy"
-                referrerpolicy="no-referrer"
-                allowfullscreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              ></iframe>
-            @else
-              <video src="{{ $fileSrc }}" controls class="w-full max-h-[60vh]"></video>
-            @endif
-          @else
-            <img
+            <iframe
               src="{{ $fileSrc }}"
-              alt="{{ $galeri->judul }}"
-              class="w-full max-h-[65vh] object-contain"
+              class="w-full h-[60vh]"
+              loading="lazy"
               referrerpolicy="no-referrer"
-              onerror="this.onerror=null;this.src='{{ $fallbackImg }}';"
-            />
+              allowfullscreen
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            ></iframe>
+          @else
+            <div class="relative w-full">
+              @if(!empty($fileSrc))
+                <img
+                  id="mainImg"
+                  src="{{ $fileSrc }}"
+                  alt="{{ $galeri->judul }}"
+                  class="w-full max-h-[65vh] object-contain"
+                  referrerpolicy="no-referrer"
+                  loading="lazy"
+                />
+                <div id="imgError"
+                     class="hidden absolute inset-0 flex items-center justify-center p-6 text-center">
+                  <div class="rounded-2xl border border-white/12 bg-black/50 px-4 py-3 text-sm text-white/90">
+                    Gambar gagal dimuat.<br>
+                    Pastikan Google Drive: <b>Anyone with the link</b>.<br>
+                    Dan pastikan yang diinput adalah <b>link FILE</b> (bukan folder).
+                  </div>
+                </div>
+              @else
+                <div class="p-10 text-center text-white/80">
+                  Belum ada link gambar.
+                </div>
+              @endif
+            </div>
+
+            <script>
+              document.addEventListener('DOMContentLoaded', () => {
+                const img = document.getElementById('mainImg');
+                const err = document.getElementById('imgError');
+                if (!img || !err) return;
+                img.addEventListener('error', () => {
+                  err.classList.remove('hidden');
+                  img.classList.add('opacity-0');
+                });
+              });
+            </script>
           @endif
         </div>
       </div>
@@ -178,18 +176,32 @@
             ← Kembali
           </a>
 
-          <a href="{{ $action }}" target="_blank" rel="noreferrer"
-             class="rounded-2xl px-4 py-2 text-xs font-extrabold text-[#13392f] hover:brightness-110"
-             style="background: var(--accent);">
-            {{ $type === 'image' ? 'Unduh' : 'Buka' }}
-          </a>
+          @if(!empty($action))
+            <a href="{{ $action }}" target="_blank" rel="noreferrer"
+               class="rounded-2xl px-4 py-2 text-xs font-extrabold text-[#13392f] hover:brightness-110"
+               style="background: var(--accent);">
+              {{ $type === 'image' ? 'Unduh' : 'Buka' }}
+            </a>
+          @endif
         </div>
 
-        {{-- debug (hapus kalau sudah beres) --}}
+        @if(!empty($gdriveMore))
+          <a href="{{ $gdriveMore }}" target="_blank" rel="noopener"
+             class="mt-3 inline-flex w-full items-center justify-center rounded-2xl border border-white/14 bg-white/10 px-4 py-2 text-xs font-extrabold text-white hover:bg-white/15">
+            Lihat Foto Lainnya di Google Drive →
+          </a>
+        @endif
+
+        {{-- DEBUG (kalau masih bandel, buka ini) --}}
+        {{--
         <div class="mt-4 text-[10px] text-white/35 break-all">
-          url_file: {{ $galeri->url_file }} <br>
-          fileSrc: {{ $fileSrc }}
+          url_file(DB): {{ $galeri->url_file }} <br>
+          driveId: {{ $driveId }} <br>
+          fileSrc: {{ $fileSrc }} <br>
+          action: {{ $action }} <br>
+          gdrive_url: {{ $galeri->gdrive_url }}
         </div>
+        --}}
       </aside>
     </div>
   </div>

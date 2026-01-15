@@ -143,24 +143,41 @@
               <div class="px-6 py-4">
                 <div class="w-full overflow-x-auto">
                   <table class="w-full caption-bottom text-sm">
-                    <thead class="[&_tr]:border-b">
-                      <tr class="border-b">
-                        <th class="h-10 px-2 text-left align-middle text-xs font-medium text-slate-500">Nama</th>
-                        <th class="hidden h-10 px-2 text-left align-middle text-xs font-medium text-slate-500 md:table-cell">
-                          Email
-                        </th>
-                        <th class="h-10 px-2 text-left align-middle text-xs font-medium text-slate-500">Role</th>
-                        <th class="h-10 px-2 text-left align-middle text-xs font-medium text-slate-500">Status</th>
-                        <th class="hidden h-10 px-2 text-left align-middle text-xs font-medium text-slate-500 md:table-cell">
-                          Tanggal Registrasi
-                        </th>
-                        <th class="h-10 px-2 text-right align-middle text-xs font-medium text-slate-500">
-                          <span class="sr-only">Actions</span>
-                        </th>
-                      </tr>
-                    </thead>
+                    <tr class="border-b">
+  <th class="h-10 px-2 text-left align-middle text-xs font-medium text-slate-500">Nama</th>
+
+  <th class="hidden h-10 px-2 text-left align-middle text-xs font-medium text-slate-500 md:table-cell">
+    Email
+  </th>
+
+  {{-- ✅ NO HP --}}
+  <th class="hidden h-10 px-2 text-left align-middle text-xs font-medium text-slate-500 md:table-cell">
+    No. HP
+  </th>
+
+  <th class="h-10 px-2 text-left align-middle text-xs font-medium text-slate-500">Role</th>
+  <th class="h-10 px-2 text-left align-middle text-xs font-medium text-slate-500">Status</th>
+
+  <th class="hidden h-10 px-2 text-left align-middle text-xs font-medium text-slate-500 md:table-cell">
+    Tanggal Registrasi
+  </th>
+
+  <th class="h-10 px-2 text-right align-middle text-xs font-medium text-slate-500">
+    <span class="sr-only">Actions</span>
+  </th>
+</tr>
+
                     <tbody class="[&_tr:last-child]:border-0">
                       @foreach ($users as $user)
+                      @php
+  $rawPhone = (string) ($user->phone ?? '');
+  $waPhone  = preg_replace('/[^0-9]/', '', $rawPhone);
+
+  if ($waPhone && str_starts_with($waPhone, '0')) {
+    $waPhone = '62' . substr($waPhone, 1);
+  }
+@endphp
+
                       <tr class="border-b">
                         <td class="p-2 align-middle">
                           <div class="font-medium text-slate-900">{{ $user->name }}</div>
@@ -171,6 +188,24 @@
                         <td class="hidden p-2 align-middle md:table-cell">
                           {{ $user->email }}
                         </td>
+                        {{-- ✅ NO HP --}}
+<td class="hidden p-2 align-middle md:table-cell">
+  @if($rawPhone)
+    <div class="flex items-center gap-2">
+      <span class="text-slate-700">{{ $rawPhone }}</span>
+
+      @if($waPhone)
+        <a href="https://wa.me/{{ $waPhone }}" target="_blank"
+           class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100">
+          WA
+        </a>
+      @endif
+    </div>
+  @else
+    <span class="text-slate-400">-</span>
+  @endif
+</td>
+
                         <td class="p-2 align-middle">
                           @php
                             $roleClass = '';

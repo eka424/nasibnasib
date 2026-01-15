@@ -197,26 +197,31 @@ class GaleriController extends Controller
     }
 
     protected function prepareData(GaleriRequest $request, ?Galeri $galeri = null): array
-    {
-        // ambil data yang memang kita simpan
-        $data = $request->safe()->only([
-            'judul', 'deskripsi', 'tipe', 'kategori', 'seksi', 'url_file',
-        ]);
+{
+    // ambil data yang memang kita simpan (TAMBAH gdrive_url)
+    $data = $request->safe()->only([
+        'judul', 'deskripsi', 'tipe', 'kategori', 'seksi', 'url_file', 'gdrive_url',
+    ]);
 
-        $data['seksi'] = $request->filled('seksi') ? $request->input('seksi') : null;
+    $data['seksi'] = $request->filled('seksi') ? $request->input('seksi') : null;
 
-        // ✅ PAKSA url_file terset + dinormalisasi
-        $rawUrl = trim((string) $request->input('url_file'));
+    // simpan gdrive_url opsional
+    $data['gdrive_url'] = $request->filled('gdrive_url')
+        ? trim((string) $request->input('gdrive_url'))
+        : null;
 
-        if (($data['tipe'] ?? null) === 'image') {
-            $data['url_file'] = $this->normalizeDriveImageThumb($rawUrl);
-        } else {
-            // video
-            $data['url_file'] = $this->normalizeVideoUrl($rawUrl);
-        }
+    // normalisasi url_file
+    $rawUrl = trim((string) $request->input('url_file'));
 
-        return $data;
+    if (($data['tipe'] ?? null) === 'image') {
+        $data['url_file'] = $this->normalizeDriveImageThumb($rawUrl);
+    } else {
+        $data['url_file'] = $this->normalizeVideoUrl($rawUrl);
     }
+
+    return $data;
+}
+
 
     protected function normalizeVideoUrl(string $url): string
     {
