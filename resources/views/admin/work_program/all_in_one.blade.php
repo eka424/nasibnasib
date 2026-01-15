@@ -47,7 +47,7 @@
         @csrf
         <div class="col-md-6">
           <label class="form-label fw-bold">Tambah Seksi</label>
-          <input name="nama" class="form-control" placeholder="Contoh: SEKSI PERIBADATAN" required>
+          <input name="nama" class="form-control text" placeholder="Contoh: SEKSI PERIBADATAN" required>
         </div>
         <div class="col-md-2">
           <label class="form-label">Urutan</label>

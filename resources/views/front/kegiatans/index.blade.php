@@ -62,6 +62,73 @@
     opacity: .85;
     cursor: pointer;
   }
+
+  /* =========================
+   FILTER CONTRAST FIX
+   ========================= */
+
+/* Judul section (Tanggal / Jenis / Status) */
+.filter-title,
+aside p.uppercase,
+#filterPanel p.uppercase {
+  color: rgba(255,255,255,0.95) !important;
+}
+
+/* Label checkbox */
+.filter-label,
+aside label,
+#filterPanel label {
+  color: rgba(255,255,255,0.9) !important;
+  font-weight: 500;
+}
+
+/* Helper text */
+.filter-hint,
+aside .text-white\/70,
+#filterPanel .text-white\/55 {
+  color: rgba(255,255,255,0.75) !important;
+}
+
+/* Checkbox style */
+input[type="checkbox"] {
+  accent-color: #E7B14B;
+  cursor: pointer;
+}
+
+/* Checkbox + label alignment */
+label.inline-flex {
+  align-items: center;
+  gap: 0.55rem;
+}
+
+/* Mobile filter panel background stronger */
+#filterPanel > div {
+  background: rgba(19,57,47,0.96) !important;
+}
+
+/* Mobile filter title */
+#filterPanel h2,
+#filterPanel p.text-lg {
+  color: #ffffff !important;
+}
+
+/* Mobile date input */
+#filterPanel input[type="date"] {
+  background: rgba(255,255,255,0.95) !important;
+  color: #0f172a !important;
+}
+
+/* Desktop filter card text */
+aside {
+  color: rgba(255,255,255,0.92);
+}
+
+/* Buttons */
+button[type="submit"],
+button[type="button"] {
+  font-weight: 600;
+}
+
 </style>
 
 <div class="min-h-screen text-white" style="background: var(--bg);">
@@ -196,7 +263,7 @@
           <p class="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-white/70">Jenis</p>
           <div class="grid grid-cols-2 gap-2 text-xs">
             @foreach ($jenisList as $j)
-              <label class="inline-flex items-center gap-2 text-white/85">
+              <label class="inline-flex items-center gap-2 text-white">
                 <input type="checkbox" name="jenis[]" value="{{ $j }}"
                   class="h-4 w-4 rounded border-white/25 bg-white/10"
                   {{ in_array($j, (array)$jenisChecked) ? 'checked' : '' }} />

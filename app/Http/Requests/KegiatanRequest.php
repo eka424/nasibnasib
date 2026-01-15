@@ -21,7 +21,6 @@ class KegiatanRequest extends FormRequest
             'lokasi' => ['nullable', 'string', 'max:255'],
             'poster' => ['nullable', 'string', 'max:2048'],
             'kuota' => ['nullable', 'integer', 'min:1'],
-
         ];
     }
 }

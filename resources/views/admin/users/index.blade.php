@@ -1,47 +1,83 @@
-<x-app-layout>
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-semibold text-gray-800">Users</h1>
-            <p class="text-sm text-gray-500">Kelola akun dan hak akses.</p>
-        </div>
-        <a href="{{ route('admin.users.create') }}"
-            class="rounded bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700">Tambah User</a>
+@extends('layouts.app')
+
+@section('content')
+<div class="mx-auto w-full max-w-7xl">
+
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-xl font-bold text-slate-900">Users</h1>
+      <p class="mt-1 text-sm text-slate-500">Kelola data pengguna.</p>
     </div>
 
-    <div class="overflow-x-auto bg-white shadow rounded">
-        <table class="w-full text-left text-sm">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-4 py-2">Nama</th>
-                    <th class="px-4 py-2">Email</th>
-                    <th class="px-4 py-2">Role</th>
-                    <th class="px-4 py-2 text-right">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($users as $user)
-                    <tr class="border-t">
-                        <td class="px-4 py-2">{{ $user->name }}</td>
-                        <td class="px-4 py-2">{{ $user->email }}</td>
-                        <td class="px-4 py-2 capitalize">{{ $user->role }}</td>
-                        <td class="px-4 py-2 text-right space-x-2">
-                            <a href="{{ route('admin.users.show', $user) }}" class="text-sm text-blue-600">Detail</a>
-                            <a href="{{ route('admin.users.edit', $user) }}" class="text-sm text-emerald-600">Edit</a>
-                            <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
-                                class="inline-block"
-                                onsubmit="return confirm('Hapus user ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-sm text-red-600">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
+    @if (\Illuminate\Support\Facades\Route::has('admin.users.create'))
+      <a href="{{ route('admin.users.create') }}"
+         class="inline-flex items-center rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600">
+        + Tambah User
+      </a>
+    @endif
+  </div>
+
+  <div class="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="border-b border-slate-200 px-5 py-4">
+      <div class="text-sm font-semibold text-slate-900">Daftar User</div>
+      <div class="text-xs text-slate-500">Berikut data pengguna yang terdaftar.</div>
+    </div>
+
+    <div class="-mx-4 overflow-x-auto sm:mx-0">
+      <div class="min-w-full px-4 sm:px-0">
+        <table class="w-full min-w-[700px] text-sm">
+          <thead class="bg-slate-50">
+            <tr class="border-b border-slate-200 text-left">
+              <th class="px-4 py-3 text-xs font-semibold text-slate-600">Nama</th>
+              <th class="px-4 py-3 text-xs font-semibold text-slate-600">Email</th>
+              <th class="px-4 py-3 text-xs font-semibold text-slate-600">Role</th>
+              <th class="px-4 py-3 text-xs font-semibold text-slate-600 text-right">Aksi</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @forelse(($users ?? []) as $u)
+              <tr class="border-t border-slate-100">
+                <td class="px-4 py-3 font-medium text-slate-900 whitespace-nowrap">
+                  {{ $u->name ?? '-' }}
+                </td>
+
+                <td class="px-4 py-3 text-slate-600">
+                  <div class="max-w-[340px] truncate">{{ $u->email ?? '-' }}</div>
+                </td>
+
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                    {{ $u->role ?? '-' }}
+                  </span>
+                </td>
+
+                <td class="px-4 py-3 text-right whitespace-nowrap">
+                  @if (\Illuminate\Support\Facades\Route::has('admin.users.edit'))
+                    <a href="{{ route('admin.users.edit', $u->id) }}"
+                       class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                      Edit
+                    </a>
+                  @endif
+                </td>
+              </tr>
+            @empty
+              <tr>
+                <td colspan="4" class="px-4 py-10 text-center text-slate-500">
+                  Tidak ada data user.
+                </td>
+              </tr>
+            @endforelse
+          </tbody>
         </table>
+      </div>
     </div>
 
-    <div class="mt-4">
+    @if(isset($users) && method_exists($users, 'links'))
+      <div class="border-t border-slate-200 px-5 py-4">
         {{ $users->links() }}
-    </div>
-</x-app-layout>
+      </div>
+    @endif
+  </div>
+</div>
+@endsection

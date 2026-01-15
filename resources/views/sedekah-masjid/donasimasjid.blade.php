@@ -158,7 +158,7 @@
                 placeholder="email@example.com">
             </div>
             <div>
-              <label class="text-sm font-semibold text-white/85">WhatsApp (opsional)</label>
+              <label class="text-sm font-semibold text-white">WhatsApp (opsional)</label>
               <input name="whatsapp"
                 class="mt-2 h-12 w-full rounded-2xl border border-white/15 bg-white px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[rgba(231,177,75,0.55)]"
                 placeholder="08xxxxxxxxxx">

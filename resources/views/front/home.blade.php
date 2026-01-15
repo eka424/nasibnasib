@@ -34,10 +34,11 @@
 
     // ====== Nav data (routes tetap sama) ======
     $bottomNav = [
-        ['id' => 'beranda', 'label' => 'Home', 'href' => route('home'), 'icon' => 'home', 'type' => 'link'],
-        ['id' => 'kegiatan', 'label' => 'Kegiatan', 'href' => route('kegiatan.index'), 'icon' => 'calendar', 'type' => 'link'],
-        ['id' => 'artikel', 'label' => 'Artikel', 'href' => route('artikel.index'), 'icon' => 'book', 'type' => 'link'],
-    ];
+  ['id' => 'beranda',  'label' => 'Home',     'href' => route('home'),          'icon' => 'home',     'type' => 'link'],
+  ['id' => 'kegiatan', 'label' => 'Kegiatan', 'href' => route('kegiatan.index'),'icon' => 'calendar', 'type' => 'link'],
+  ['id' => 'artikel',  'label' => 'Artikel',  'href' => route('artikel.index'), 'icon' => 'book',     'type' => 'link'],
+  ['id' => 'more',     'label' => 'Lainnya',  'href' => '#',                    'icon' => 'menu',     'type' => 'button'],
+];
 
     $quickAmounts = [
         ['label' => 'Rp 10.000', 'icon' => 'spark'],
@@ -181,7 +182,9 @@
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Amiri:wght@400;700&display=swap');
-
+:root {
+  --bottom-nav-h: 84px; /* tinggi aman bottom bar mobile */
+}
     :root{
       --bg:#13392f;
       --gold:#E7B14B;
@@ -753,12 +756,25 @@
   </section>
 
   {{-- BOTTOM NAV --}}
-  <nav class="fixed inset-x-0 bottom-0 z-50 pb-[env(safe-area-inset-bottom)]">
-    <div class="mx-auto w-full px-4 sm:px-6 lg:px-10 2xl:px-16">
-      <div class="rounded-[26px] border border-white/12 bg-black/45 p-2 shadow-[0_18px_60px_-35px_rgba(0,0,0,0.75)] backdrop-blur">
-        <div class="grid grid-cols-4 gap-1">
-          @foreach($bottomNav as $n)
-            <a href="{{ $n['href'] }}"
+  <nav class="fixed inset-x-0 bottom-0 z-50 min-h-[84px] pb-[env(safe-area-inset-bottom)] lg:hidden">
+  <div class="mx-auto w-full px-4 sm:px-6">
+    <div class="rounded-[26px] border border-white/12 bg-black/45 p-2 shadow-[0_18px_60px_-35px_rgba(0,0,0,0.75)] backdrop-blur">
+      <div class="grid grid-cols-4 gap-1">
+        @foreach($bottomNav as $n)
+          @if($n['type'] === 'button')
+            <button
+              type="button"
+              id="btnMore"
+              data-bottom-item
+              data-bottom-id="{{ $n['id'] }}"
+              class="bottom-item btn flex w-full flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center text-xs font-semibold"
+              aria-label="{{ $n['label'] }}">
+              <span class="text-base inline-flex" aria-hidden>{!! $svg[$n['icon']] !!}</span>
+              <span class="text-[11px]">{{ $n['label'] }}</span>
+            </button>
+          @else
+            <a
+              href="{{ $n['href'] }}"
               data-bottom-item
               data-bottom-id="{{ $n['id'] }}"
               class="bottom-item btn flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 text-center text-xs font-semibold"
@@ -766,11 +782,13 @@
               <span class="text-base inline-flex" aria-hidden>{!! $svg[$n['icon']] !!}</span>
               <span class="text-[11px]">{{ $n['label'] }}</span>
             </a>
-          @endforeach
-        </div>
+          @endif
+        @endforeach
       </div>
     </div>
-  </nav>
+  </div>
+</nav>
+
 
   {{-- MOBILE DRAWER --}}
   <div id="mobileDrawerRoot" class="pointer-events-none fixed inset-0 z-[60]">
@@ -823,6 +841,66 @@
       </div>
     </aside>
   </div>
+{{-- MORE SHEET (Slide Up) --}}
+<div id="moreBackdrop" class="fixed inset-0 z-[70] hidden bg-black/60"></div>
+<div class="flex justify-center pt-3">
+  <span class="h-1.5 w-12 rounded-full bg-white/30"></span>
+</div>
+
+<div id="moreSheet"
+ class="fixed inset-x-0 z-[71] translate-y-[120%] transition-transform duration-200 ease-out lg:hidden"
+ style="bottom: var(--bottom-nav-h);">
+
+  <div class="mx-auto w-full px-4 sm:px-6 pb-6">
+
+    <div class="glass rounded-[28px] overflow-hidden">
+      <div class="flex items-center justify-between px-5 pt-4 pb-3">
+        <div>
+          <p class="text-xs text-white/60">Menu</p>
+          <p class="heading text-lg font-extrabold">Lainnya</p>
+        </div>
+        <button id="btnCloseMore" type="button"
+          class="grid h-11 w-11 place-items-center rounded-2xl border border-white/15 bg-white/5 text-white">
+          {!! $svg['x'] !!}
+        </button>
+      </div>
+
+      <div class="px-5 pb-5">
+        <div class="grid grid-cols-3 gap-3">
+          <a href="{{ route('sedekah.index') }}" class="rounded-2xl border border-white/15 bg-white/5 p-3 text-center hover:bg-white/10">
+            <div class="mx-auto grid h-10 w-10 place-items-center rounded-2xl bg-white/10">{!! $svg['heart'] !!}</div>
+            <div class="mt-2 text-[11px] font-semibold">Sedekah</div>
+          </a>
+
+          <a href="{{ route('galeri.index') }}" class="rounded-2xl border border-white/15 bg-white/5 p-3 text-center hover:bg-white/10">
+            <div class="mx-auto grid h-10 w-10 place-items-center rounded-2xl bg-white/10">{!! $svg['report'] !!}</div>
+            <div class="mt-2 text-[11px] font-semibold">Galeri</div>
+          </a>
+
+          <a href="{{ route('perpustakaan.index') }}" class="rounded-2xl border border-white/15 bg-white/5 p-3 text-center hover:bg-white/10">
+            <div class="mx-auto grid h-10 w-10 place-items-center rounded-2xl bg-white/10">{!! $svg['library'] !!}</div>
+            <div class="mt-2 text-[11px] font-semibold">Perpus</div>
+          </a>
+
+          <a href="{{ route('tanya-ustadz.index') }}" class="rounded-2xl border border-white/15 bg-white/5 p-3 text-center hover:bg-white/10">
+            <div class="mx-auto grid h-10 w-10 place-items-center rounded-2xl bg-white/10">{!! $svg['info'] !!}</div>
+            <div class="mt-2 text-[11px] font-semibold">Tanya Ustadz</div>
+          </a>
+
+          <a href="{{ route('public.finance') }}" class="rounded-2xl border border-white/15 bg-white/5 p-3 text-center hover:bg-white/10">
+            <div class="mx-auto grid h-10 w-10 place-items-center rounded-2xl bg-white/10">{!! $svg['wallet'] !!}</div>
+            <div class="mt-2 text-[11px] font-semibold">Keuangan</div>
+          </a>
+
+          <a href="{{ route('profile.edit') }}" class="rounded-2xl border border-white/15 bg-white/5 p-3 text-center hover:bg-white/10">
+            <div class="mx-auto grid h-10 w-10 place-items-center rounded-2xl bg-white/10">{!! $svg['mosque'] !!}</div>
+            <div class="mt-2 text-[11px] font-semibold">Akun</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
   {{-- SCRIPTS (drawer, animate, bottom nav active, reminder carousel) --}}
   <script>
@@ -832,6 +910,32 @@
       const drawer = document.getElementById('mobileDrawer');
       const openBtns = document.querySelectorAll('[data-open-drawer]');
       const closeBtns = document.querySelectorAll('[data-close-drawer]');
+
+// MORE SHEET
+const btnMore = document.getElementById('btnMore');
+const moreBackdrop = document.getElementById('moreBackdrop');
+const moreSheet = document.getElementById('moreSheet');
+const btnCloseMore = document.getElementById('btnCloseMore');
+
+function openMore() {
+  if (!moreBackdrop || !moreSheet) return;
+  moreBackdrop.classList.remove('hidden');
+  moreSheet.style.transform = 'translateY(0)';
+  document.body.style.overflow = 'hidden';
+}
+function closeMore() {
+  if (!moreBackdrop || !moreSheet) return;
+  moreBackdrop.classList.add('hidden');
+  moreSheet.style.transform = 'translateY(110%)';
+  document.body.style.overflow = '';
+}
+
+btnMore?.addEventListener('click', openMore);
+moreBackdrop?.addEventListener('click', closeMore);
+btnCloseMore?.addEventListener('click', closeMore);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMore(); });
+
+
 
       function setDrawer(open) {
         if (!drawerRoot || !overlay || !drawer) return;

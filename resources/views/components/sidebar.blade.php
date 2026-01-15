@@ -14,8 +14,6 @@
             ['label' => 'Artikel', 'route' => 'admin.artikels.index'],
             ['label' => 'Kegiatan', 'route' => 'admin.kegiatans.index'],
             ['label' => 'Pendaftar Kegiatan', 'route' => 'admin.pendaftaran-kegiatans.index'],
-            ['label' => 'Donasi', 'route' => 'admin.donasis.index'],
-            ['label' => 'Transaksi Donasi', 'route' => 'admin.transaksi-donasis.index'],
             ['label' => 'Galeri', 'route' => 'admin.galeris.index'],
             ['label' => 'Perpustakaan', 'route' => 'admin.perpustakaans.index'],
             ['label' => 'Ramah Anak', 'route' => $kidsRouteName],
@@ -38,10 +36,9 @@
             ['label' => 'Artikel', 'route' => 'artikel.index'],
             ['label' => 'Kegiatan', 'route' => 'kegiatan.index'],
             ['label' => 'Riwayat Kegiatan', 'route' => 'kegiatan.riwayat'],
-            ['label' => 'Donasi', 'route' => 'donasi.index'],
-            ['label' => 'Riwayat Donasi', 'route' => 'donasi.riwayat'],
             ['label' => 'Galeri', 'route' => 'galeri.index'],
             ['label' => 'Perpustakaan', 'route' => 'perpustakaan.index'],
+            ['label' => 'Sedekahmu', 'route' => 'sedekah.riwayat'],
             ['label' => 'Tanya Ustadz', 'route' => 'tanya-ustadz.index'],
             ['label' => 'Pertanyaan Saya', 'route' => 'tanya-ustadz.my'],
             ['label' => 'Profil Saya', 'route' => 'profile.edit'],
@@ -50,112 +47,84 @@
 
     $menus = $user ? ($baseMenus[$role] ?? []) : [];
 
-    $brand = config('app.name', 'Web Masjid');
-
-    // helper buat render list menu
-    $renderMenu = function () use ($menus) {
-        foreach ($menus as $menu) {
-            $isActive =
-                request()->routeIs($menu['route']) ||
-                request()->routeIs($menu['route'].'.*');
-
-            $href = '#';
-            if (is_string($menu['route']) && \Illuminate\Support\Facades\Route::has($menu['route'])) {
-                $href = route($menu['route']);
-            }
-
-            echo '<a href="'.$href.'" class="flex items-center justify-between rounded px-3 py-2 text-sm font-medium '.
-                ($isActive ? 'bg-emerald-100 text-emerald-800' : 'text-gray-600 hover:bg-gray-100').
-                '">';
-            echo '<span>'.$menu['label'].'</span>';
-
-            if (($menu['label'] ?? '') === 'Ramah Anak') {
-                echo '<span class="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-emerald-900">ANAK</span>';
-            }
-
-            echo '</a>';
-        }
+    // helper label role
+    $roleLabel = match($role) {
+        'admin' => 'Admin',
+        'pengurus' => 'Pengurus',
+        'ustadz' => 'Ustadz',
+        'jamaah' => 'Jamaah',
+        default => 'User',
     };
 @endphp
 
 @if($user)
-<div x-data="{ open: false }" class="w-full">
-
-    {{-- MOBILE TOP BAR --}}
-    <div class="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 px-4 py-3">
-        <button
-            type="button"
-            class="inline-flex items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100"
-            @click="open = true"
-            aria-label="Buka menu"
-        >
-            {{-- icon hamburger --}}
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-        </button>
-
-        <div class="text-base font-semibold text-emerald-700">
-            {{ $brand }}
+<aside class="w-64 bg-white border-r border-slate-200 text-slate-900">
+    {{-- header/sidebar brand --}}
+    <div class="px-4 py-5">
+        <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-700 text-white font-bold">
+                {{ mb_substr(config('app.name', 'WM'), 0, 1) }}
+            </div>
+            <div class="min-w-0">
+                <div class="truncate text-base font-semibold text-emerald-700">
+                    {{ config('app.name', 'Web Masjid') }}
+                </div>
+                <div class="text-xs text-slate-500">
+                    Panel {{ $roleLabel }}
+                </div>
+            </div>
         </div>
-
-        <div class="w-10"></div>
     </div>
 
-    {{-- MOBILE OVERLAY --}}
-    <div
-        x-show="open"
-        x-transition.opacity
-        class="lg:hidden fixed inset-0 z-40 bg-black/40"
-        @click="open = false"
-        aria-hidden="true"
-    ></div>
+    <div class="px-4">
+        <div class="h-px bg-slate-200/70"></div>
+    </div>
 
-    {{-- MOBILE DRAWER --}}
-    <aside
-        x-show="open"
-        x-transition:enter="transition ease-out duration-200"
-        x-transition:enter-start="-translate-x-full"
-        x-transition:enter-end="translate-x-0"
-        x-transition:leave="transition ease-in duration-150"
-        x-transition:leave-start="translate-x-0"
-        x-transition:leave-end="-translate-x-full"
-        class="lg:hidden fixed left-0 top-0 z-50 h-full w-72 bg-white border-r border-gray-200 px-4 py-6"
-        @keydown.escape.window="open = false"
-    >
-        <div class="flex items-center justify-between">
-            <div class="text-xl font-semibold text-emerald-700">
-                {{ $brand }}
-            </div>
-
-            <button
-                type="button"
-                class="rounded-md p-2 text-gray-700 hover:bg-gray-100"
-                @click="open = false"
-                aria-label="Tutup menu"
-            >
-                {{-- icon X --}}
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
+    {{-- menu --}}
+    <nav class="px-3 py-4">
+        <div class="mb-2 px-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            Menu
         </div>
 
-        <nav class="mt-8 space-y-2">
-            {!! $renderMenu() !!}
-        </nav>
-    </aside>
+        <div class="space-y-1">
+            @foreach ($menus as $menu)
+                @php
+                    $routeName = $menu['route'];
 
-    {{-- DESKTOP SIDEBAR --}}
-    <aside class="hidden lg:flex lg:flex-col w-64 bg-white border-r border-gray-200 px-4 py-6">
-        <div class="flex items-center gap-2 px-2 text-xl font-semibold text-emerald-700">
-            <span>{{ $brand }}</span>
+                    $isActive =
+                        request()->routeIs($routeName) ||
+                        request()->routeIs($routeName . '.*');
+
+                    $href = '#';
+                    if (is_string($routeName) && \Illuminate\Support\Facades\Route::has($routeName)) {
+                        $href = route($routeName);
+                    }
+
+                    $isKids = (($menu['label'] ?? '') === 'Ramah Anak');
+                @endphp
+
+                <a href="{{ $href }}"
+                   class="group flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition
+                          {{ $isActive
+                                ? 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200'
+                                : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                    <span class="truncate">{{ $menu['label'] }}</span>
+
+                    @if($isKids)
+                        <span class="ml-2 shrink-0 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-emerald-900">
+                            ANAK
+                        </span>
+                    @endif
+                </a>
+            @endforeach
         </div>
 
-        <nav class="mt-8 space-y-2">
-            {!! $renderMenu() !!}
-        </nav>
-    </aside>
-
-</div>
+        {{-- footer kecil --}}
+        <div class="mt-6 rounded-xl bg-slate-50 px-3 py-3">
+            <div class="text-xs font-semibold text-slate-600">Login sebagai</div>
+            <div class="mt-1 truncate text-sm text-slate-900">{{ $user->name ?? 'User' }}</div>
+            <div class="text-xs text-slate-500 truncate">{{ $user->email ?? '' }}</div>
+        </div>
+    </nav>
+</aside>
 @endif
